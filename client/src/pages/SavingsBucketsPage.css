@@ -1,0 +1,171 @@
+/* src/pages/SavingsBucketsPage.css */
+
+.buckets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.buckets-header h2 {
+  margin: 0;
+}
+
+/* We can re-use this button style from TrackerPage.css */
+.add-new-btn {
+  background-color: #1677ff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-new-btn:hover {
+  background-color: #096dd9;
+}
+
+.buckets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.bucket-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.bucket-card-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.bucket-amount {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.bucket-goal {
+  color: #777;
+}
+
+.bucket-card-footer {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-bar-outline {
+  flex-grow: 1;
+  height: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  overflow: hidden; /* This is important */
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #52c41a; /* Green */
+  border-radius: 5px;
+}
+/* ADD THIS TO THE BOTTOM OF src/pages/SavingsBucketsPage.css */
+
+.bucket-delete-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #d9d9d9;
+  color: #777;
+  font-weight: 600;
+  border-radius: 50%; /* Makes it circular */
+  width: 24px;
+  height: 24px;
+  line-height: 22px; /* Helps center the 'x' */
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bucket-delete-btn:hover {
+  background-color: #ff4d4f; /* Red on hover */
+  border-color: #ff4d4f;
+  color: white;
+}
+/* ADD THIS TO THE BOTTOM OF src/pages/SavingsBucketsPage.css */
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.bucket-delete-btn,
+.bucket-edit-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #d9d9d9;
+  color: #777;
+  font-weight: 600;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  line-height: 22px;
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px; /* For the emoji */
+}
+
+.bucket-delete-btn:hover {
+  background-color: #ff4d4f; /* Red on hover */
+  border-color: #ff4d4f;
+  color: white;
+}
+
+.bucket-edit-btn:hover {
+  background-color: #1677ff; /* Blue on hover */
+  border-color: #1677ff;
+  color: white;
+}
+/* ADD THIS TO THE BOTTOM OF src/pages/SavingsBucketsPage.css */
+
+.bucket-add-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #d9d9d9;
+  color: #777;
+  font-weight: 600;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  line-height: 22px;
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px; /* For the emoji */
+}
+
+.bucket-add-btn:hover {
+  background-color: #2ed47a; /* Green on hover */
+  border-color: #2ed47a;
+  color: white;
+}
+
+.bucket-remaining {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #777;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.bucket-remaining.complete {
+  color: #2ed47a;
+  font-weight: 600;
+}

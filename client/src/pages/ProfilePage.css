@@ -1,0 +1,75 @@
+/* src/pages/ProfilePage.css */
+
+.profile-page-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* Profile 1/3, History 2/3 */
+  gap: 24px;
+}
+
+/* We must re-declare data-container as it's not global */
+.data-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.profile-card h3, .history-card h3 {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.profile-card .form-group {
+  margin-bottom: 16px;
+}
+.profile-card .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+.profile-card .form-group input,
+.profile-card .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-sizing: border-box; /* Important */
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.btn-save-profile {
+  background-color: #1677ff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+}
+.btn-save-profile:hover {
+  background-color: #096dd9;
+}
+
+/* History List Table Styles */
+.history-card .data-table {
+  max-height: 600px; /* Make the table scrollable */
+  overflow-y: auto;
+}
+
+.type-income, .amount-income {
+  color: #2ed47a; /* Green */
+  font-weight: 500;
+}
+.type-expense, .amount-expense {
+  color: #ff4d4f; /* Red */
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .profile-page-grid {
+    grid-template-columns: 1fr; /* Stack them on small screens */
+  }
+}

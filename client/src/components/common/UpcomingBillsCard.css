@@ -1,0 +1,71 @@
+/* src/components/common/UpcomingBillsCard.css */
+
+.upcoming-bills-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #4a4a6a; /* A subtle line in dark mode */
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.upcoming-bills-header .card-title {
+  margin: 0; /* Override default card title margins */
+}
+
+.view-all-link {
+  color: #007bff; /* Accent blue */
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.no-bills-message {
+  text-align: center;
+  padding: 30px 10px;
+  color: #a9a9c0;
+  font-size: 1rem;
+}
+
+.upcoming-bills-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px; /* Make the list scrollable if it gets too long */
+  overflow-y: auto;
+}
+
+.upcoming-bill-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 8px;
+  border-bottom: 1px solid #3a3a5a; /* Fainter line between items */
+}
+
+.upcoming-bill-item:last-child {
+  border-bottom: none;
+}
+
+.bill-info .bill-name {
+  display: block;
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.bill-info .bill-due {
+  font-size: 0.85rem;
+  color: #ff4d4f; /* Red for urgency */
+  font-weight: 500;
+}
+
+.bill-amount {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+}

@@ -1,0 +1,106 @@
+/* src/components/forms/BillForm.css */
+
+.bill-form h3 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+}
+
+.bill-form .form-group {
+  margin-bottom: 16px;
+}
+
+.bill-form .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.bill-form .form-group input,
+.bill-form .form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.bill-form .form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.bill-form .form-row .form-group {
+  flex: 1;
+}
+
+.bill-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.bill-form .form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.bill-form .btn-cancel {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.bill-form .btn-cancel:hover {
+  background-color: #e0e0e0;
+}
+
+.bill-form .btn-add {
+  background-color: #1677ff;
+  color: #fff;
+}
+
+.bill-form .btn-add:hover {
+  background-color: #096dd9;
+}
+
+/* Styles for the checkbox column */
+.bill-form .form-group-checkbox {
+  flex-basis: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.bill-form .form-group-checkbox label {
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+.bill-form .form-group-checkbox input {
+  transform: scale(1.5);
+  width: auto; /* Override the 100% width */
+}
+/* ADD THIS TO THE BOTTOM OF src/components/forms/BillForm.css */
+
+.bill-form .custom-type-input {
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 3px solid #1677ff; /* Blue accent line */
+}
+
+.bill-form .custom-type-input label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}

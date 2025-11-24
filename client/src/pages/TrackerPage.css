@@ -1,0 +1,220 @@
+/* src/pages/TrackerPage.css */
+
+/* 1. Container Styles */
+.stats-container {
+  background-color: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.data-container {
+  background-color: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* 2. Button Styles */
+.add-new-btn {
+  background-color: #1677ff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  float: right;
+  margin-bottom: 16px;
+}
+.add-new-btn:hover {
+  background-color: #096dd9;
+}
+
+/* 3. Scrollable Table Wrapper */
+.data-table-scrollable {
+  width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 4. Table Styles */
+.data-table {
+  margin-top: 24px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  /* CRITICAL: Ensure no background color leaks in */
+  background-color: transparent; 
+}
+
+/* 5. Header Styles */
+.data-table-scrollable thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--table-header-bg);
+  z-index: 1;
+}
+
+.data-table th {
+  background-color: var(--table-header-bg);
+  font-weight: 600; /* Made slightly bolder */
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  /* Use a variable for border, but we will override for dark mode below */
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* 6. Cell Styles */
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+/* 7. Row Styles - THE "INVISIBLE TEXT" FIX */
+.data-table tbody tr {
+  /* Force background to be transparent so the dark card shows through */
+  background-color: transparent !important; 
+  transition: background-color 0.2s;
+}
+
+/* Only change background on hover */
+.data-table tbody tr:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+.data-table td[colSpan] {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+}
+
+.want-need-cell {
+  text-transform: capitalize;
+}
+
+/* --- DARK MODE OVERRIDES --- */
+/* This section specifically targets Dark Mode to fix the white borders */
+body.dark-mode .data-table th,
+body.dark-mode .data-table td {
+  /* Make the border a dark, subtle grey instead of white */
+  border-bottom-color: #3a3a5a; 
+}
+
+body.dark-mode .data-table th {
+  /* Make the header slightly darker than the row */
+  background-color: #25253e; 
+}
+
+/* --- Chart Styles --- */
+.chart-container {
+  position: relative;
+}
+.chart-total {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.3;
+}
+.chart-total span {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.stats-legend {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.stats-legend div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+.stats-legend div span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stats-legend div span:last-child {
+  font-weight: 600;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.custom-tooltip {
+  background-color: rgba(0, 0, 0, 0.9); /* Darker background for tooltip */
+  padding: 10px;
+  border-radius: 6px;
+  color: white;
+  border: 1px solid #4a4a6a; /* Subtle border for tooltip */
+}
+.custom-tooltip .label {
+  font-weight: 600;
+  margin: 0;
+}
+.custom-tooltip .intro {
+  margin: 0;
+  padding-top: 5px;
+}
+/* src/pages/TrackerPage.css */
+
+/* ... (keep all your existing code above this) ... */
+
+
+/* --- FORCE DARK MODE FIXES --- */
+/* Copy and paste this to the bottom of the file */
+
+/* 1. Force the card containers to be Dark Grey */
+body.dark-mode .data-container,
+body.dark-mode .stats-container {
+  background-color: #282844 !important;
+  color: #f0f0f0 !important;
+  border: 1px solid #4a4a6a; /* Adds a nice subtle border */
+}
+
+/* 2. Force the table and rows to be transparent so the dark card shows through */
+body.dark-mode .data-table,
+body.dark-mode .data-table table,
+body.dark-mode .data-table tbody,
+body.dark-mode .data-table tr {
+  background-color: transparent !important;
+  color: #f0f0f0 !important;
+}
+
+/* 3. Fix the hover state to be a lighter grey/blue, not white */
+body.dark-mode .data-table tbody tr:hover {
+  background-color: #3a3a5a !important;
+}
+
+/* 4. Fix the borders between rows to be subtle grey */
+body.dark-mode .data-table td,
+body.dark-mode .data-table th {
+  border-bottom-color: #4a4a6a !important;
+  color: #f0f0f0 !important;
+}
+
+/* 5. Ensure the header background is dark */
+body.dark-mode .data-table th {
+  background-color: #323250 !important;
+  color: #a9a9c0 !important;
+}

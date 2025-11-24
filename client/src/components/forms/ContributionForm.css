@@ -1,0 +1,85 @@
+/* src/components/forms/ContributionForm.css */
+
+.contribution-form h3 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+}
+
+.contribution-form .form-group {
+  margin-bottom: 16px;
+}
+
+.contribution-form .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.contribution-form .form-group input,
+.contribution-form .form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.contribution-form .form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.contribution-form .form-row .form-group {
+  flex: 1;
+}
+
+.contribution-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.contribution-form .form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.contribution-form .btn-cancel {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.contribution-form .btn-cancel:hover {
+  background-color: #e0e0e0;
+}
+
+.contribution-form .btn-add {
+  background-color: #1677ff;
+  color: #fff;
+}
+
+.contribution-form .btn-add:hover {
+  background-color: #096dd9;
+}
+/* ADD THIS TO THE BOTTOM OF src/components/forms/ContributionForm.css */
+
+.contribution-form .custom-type-input {
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 3px solid #1677ff; /* Blue accent line */
+}
+
+.contribution-form .custom-type-input label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}

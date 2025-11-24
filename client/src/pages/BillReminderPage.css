@@ -1,0 +1,7 @@
+/* src/pages/BillReminderPage.css */
+
+.bill-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* This adds space between the table and the chart */
+}

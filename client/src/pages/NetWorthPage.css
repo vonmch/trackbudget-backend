@@ -1,0 +1,53 @@
+/* src/pages/NetWorthPage.css */
+
+.networth-summary-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.total-networth {
+  text-align: center;
+}
+
+.total-networth span {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.total-networth strong {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-top: 4px;
+  color: #2ed47a; /* Green for positive */
+}
+
+.graph-container {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* We must re-declare these as they're not in TrackerPage.css */
+.data-container {
+  width: 100%;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.add-new-btn {
+  background-color: #1677ff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  float: right;
+  margin-bottom: 16px;
+}
+

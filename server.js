@@ -1,18 +1,19 @@
-// server.js (Production Ready / PostgreSQL)
+// server.js (Production Ready / PostgreSQL / Monolith)
 
-require('dotenv').config(); // Load .env file
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
-const { Pool } = require('pg'); // NEW: Using Postgres
+const { Pool } = require('pg'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const path = require('path'); // REQUIRED for deployment
 
 // STRIPE SETUP
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); 
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key'; // Fallback for local dev
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key'; 
 
 app.use(cors());
 app.use(express.json());
@@ -21,7 +22,7 @@ app.use(express.json());
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false // Required for most cloud databases (Neon/Render)
+    rejectUnauthorized: false // Required for Render
   }
 });
 
@@ -102,7 +103,7 @@ app.put('/api/profile/upgrade', authenticateToken, async (req, res) => {
   } catch (error) { res.status(500).json({ error: 'Failed to upgrade' }); }
 });
 
-// --- DATA ROUTES (Converted to Postgres Syntax $1, $2...) ---
+// --- DATA ROUTES ---
 
 app.get('/api/expenses', authenticateToken, async (req, res) => {
   const result = await query(`SELECT * FROM expenses WHERE user_id = $1 ORDER BY date DESC`, [req.user.id]);
@@ -286,23 +287,36 @@ app.get('/api/history', authenticateToken, async (req, res) => {
   const result = await query(sql, [req.user.id]);
   res.json(result.rows);
 });
+
 app.get('/api/notifications', authenticateToken, async (req, res) => {
+  // CRASH FIX: Added ::date casting to make Postgres happy comparing Text vs Date
   const sql = `
     SELECT * FROM bills 
     WHERE user_id = $1 
     AND is_paid = false 
-    AND due_date >= current_date 
-    AND due_date <= current_date + interval '7 days' 
+    AND due_date::date >= current_date 
+    AND due_date::date <= current_date + interval '7 days' 
     ORDER BY due_date ASC
   `;
   const result = await query(sql, [req.user.id]);
   res.json(result.rows);
 });
 
+// --- DEPLOYMENT GLUE CODE (SERVE VITE APP) ---
+// This tells Node to serve the React files from the 'client/dist' folder
+app.use(express.static(path.join(__dirname, 'client/dist')));
+
+// This handles any requests that aren't API calls (e.g. refreshing the page)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
+});
+// ---------------------------------------------
+
+
 // STARTUP
 (async () => {
   try {
-    // CREATE TABLES IN POSTGRES IF THEY DON'T EXIST
+    // CREATE TABLES
     const tables = [
       `CREATE TABLE IF NOT EXISTS users (
          id SERIAL PRIMARY KEY, 
@@ -328,7 +342,6 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 
   } catch (e) {
-    // console.error("Database Connection Error:", e); // Commented out for local dev if DB not set up yet
     console.log("Server running (waiting for DB connection)...");
     app.listen(PORT);
   }

@@ -1,0 +1,75 @@
+/* src/components/forms/AddExpenseForm.css */
+
+.expense-form h3 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label,
+.form-group-radio label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-sizing: border-box; /* Important for padding to work nicely */
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row .form-group {
+  flex: 1; /* Make them share the space equally */
+}
+
+.form-group-radio .radio-options {
+  display: flex;
+  gap: 20px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btn-cancel:hover {
+  background-color: #e0e0e0;
+}
+
+.btn-add {
+  background-color: #1677ff;
+  color: #fff;
+}
+
+.btn-add:hover {
+  background-color: #096dd9;
+}

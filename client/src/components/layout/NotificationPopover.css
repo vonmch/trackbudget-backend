@@ -1,0 +1,49 @@
+/* src/components/layout/NotificationPopover.css */
+
+.notification-popover {
+  position: absolute;
+  top: 55px; /* Position it just below the navbar */
+  right: 20px;
+  width: 320px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  z-index: 1001; /* Make sure it's on top of other content */
+  border: 1px solid #e0e0e0;
+}
+
+.popover-header {
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.no-notifications {
+  padding: 30px 20px;
+  text-align: center;
+  color: #777;
+}
+
+.notification-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-item a {
+  display: block;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.notification-item a:hover {
+  background-color: #f4f7fa;
+}
+
+.notification-item strong {
+  color: #1677ff; /* Blue accent */
+}
