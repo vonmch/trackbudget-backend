@@ -2,8 +2,7 @@
 
 // 1. Define your Backend URLs explicitly
 const LOCAL_URL = 'http://127.0.0.1:4000/api';
-const PROD_URL = 'https://trackbudget-api.onrender.com/api';
-
+const PROD_URL = 'https://trackbudgetbuild.onrender.com';
 // 2. AUTOMATIC SWITCHER
 // If the browser address bar says "localhost" or "127.0.0.1", use Local Backend.
 // Otherwise (if on Vercel), use Production Backend.

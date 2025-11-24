@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 
 // 1. Define your Backend URLs explicitly (Same logic as api.js)
 const LOCAL_URL = 'http://127.0.0.1:4000/api';
-const PROD_URL = 'https://trackbudget-api.onrender.com/api';
+const PROD_URL = 'https://trackbudgetbuild.onrender.com';
 
 // 2. AUTOMATIC SWITCHER
 const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
