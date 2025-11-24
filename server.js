@@ -305,8 +305,8 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
 // --- DEPLOYMENT GLUE CODE (SERVE VITE APP) ---
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
-// Note: We changed '*' to '(.*)' below to fix the crash
-app.get('(.*)', (req, res) => {
+// FIX: Use Regex /.*/ to match everything (Bypasses Express 5 strict syntax)
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
 });
 // ---------------------------------------------
