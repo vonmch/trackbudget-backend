@@ -303,15 +303,13 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
 });
 
 // --- DEPLOYMENT GLUE CODE (SERVE VITE APP) ---
-// This tells Node to serve the React files from the 'client/dist' folder
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
-// This handles any requests that aren't API calls (e.g. refreshing the page)
-app.get('*', (req, res) => {
+// Note: We changed '*' to '(.*)' below to fix the crash
+app.get('(.*)', (req, res) => {
   res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
 });
 // ---------------------------------------------
-
 
 // STARTUP
 (async () => {
