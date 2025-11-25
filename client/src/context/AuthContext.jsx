@@ -1,11 +1,8 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react"; // Added useContext
 
 const AuthContext = createContext();
 
-// ----------------------------------------------------
-// NOTE: CHANGE THIS TO YOUR LIVE URL WHEN DEPLOYING
-// ----------------------------------------------------
-// const PROD_URL = 'http://localhost:4000/api'; 
+// LIVE URL (Ensure this matches your actual Render URL + /api)
 const PROD_URL = 'https://trackbudgetbuild.onrender.com/api'; 
 
 export function AuthProvider({ children }) {
@@ -40,15 +37,15 @@ export function AuthProvider({ children }) {
 
   // 2. Login Function
   const login = (userData, token) => {
-    localStorage.setItem('token', token); // Save to browser memory
+    localStorage.setItem('token', token);
     setUser(userData);
   };
 
   // 3. Logout Function
   const logout = () => {
-    localStorage.removeItem('token'); // Delete from memory
+    localStorage.removeItem('token');
     setUser(null);
-    window.location.href = '/login'; // Force redirect
+    window.location.href = '/login';
   };
 
   return (
@@ -57,5 +54,8 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+// --- THIS WAS MISSING BEFORE ---
+export const useAuth = () => useContext(AuthContext);
 
 export default AuthContext;
