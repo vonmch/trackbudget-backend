@@ -1,4 +1,4 @@
-// src/pages/SettingsPage.jsx (Full Updated Code)
+// src/pages/SettingsPage.jsx (Updated with Portal Logic)
 
 import React, { useState, useEffect } from 'react';
 import './SettingsPage.css';
@@ -27,7 +27,7 @@ function SettingsPage() {
       try {
         const response = await authFetch('/profile');
         const data = await response.json();
-        setIsPremium(data.is_premium === 1);
+        setIsPremium(data.is_premium === true || data.is_premium === 1);
       } catch (error) { console.error(error); }
     };
     checkPremium();
@@ -52,7 +52,7 @@ function SettingsPage() {
     }
   };
 
-  // --- NEW: STRIPE CHECKOUT HANDLER ---
+  // --- HANDLER: UPGRADE TO PREMIUM ---
   const handleUpgrade = async () => {
     try {
       const response = await authFetch('/create-checkout-session', {
@@ -65,6 +65,25 @@ function SettingsPage() {
     } catch (error) {
       console.error('Error starting checkout:', error);
       alert('Failed to start checkout.');
+    }
+  };
+
+  // --- NEW HANDLER: MANAGE EXISTING SUBSCRIPTION ---
+  const handleManageSubscription = async () => {
+    try {
+      const response = await authFetch('/create-portal-session', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      
+      if (data.url) {
+        window.location.href = data.url; // Redirect to Stripe Customer Portal
+      } else {
+        alert(data.error || 'Could not find subscription history.');
+      }
+    } catch (error) {
+      console.error('Error opening portal:', error);
+      alert('Failed to open subscription settings.');
     }
   };
 
@@ -103,7 +122,13 @@ function SettingsPage() {
         {isPremium ? (
           <div>
             <p className="premium-badge">🌟 You are a Premium Member!</p>
-            <p>Thank you for supporting TrackBudgetBuild.</p>
+            <p style={{marginBottom: '15px'}}>Thank you for supporting TrackBudgetBuild.</p>
+            
+            {/* NEW BUTTON FOR PREMIUM USERS */}
+            <button className="btn-manage-subscription" onClick={handleManageSubscription} style={{backgroundColor: '#555'}}>
+              Manage Subscription / Cancel
+            </button>
+
           </div>
         ) : (
           <div>
