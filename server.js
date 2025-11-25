@@ -102,7 +102,38 @@ app.put('/api/profile/upgrade', authenticateToken, async (req, res) => {
     res.status(200).json({ message: 'Upgraded to Premium!' });
   } catch (error) { res.status(500).json({ error: 'Failed to upgrade' }); }
 });
+// --- STRIPE CUSTOMER PORTAL (Manage Subscription) ---
+app.post('/api/create-portal-session', authenticateToken, async (req, res) => {
+  try {
+    // 1. Get user from DB to find their Stripe Customer ID
+    // (Note: In a perfect world, we save the 'stripe_customer_id' in the users table.
+    // Since we didn't do that earlier, we will just rely on email matching for now, 
+    // but ideally, you should save customer_id during checkout).
+    
+    // For this quick fix, we send them to the general portal login or create a session if we had the ID.
+    // Since we missed saving the 'stripe_customer_id' in step 1, 
+    // the easiest way for your client is to direct users to the BILLING Portal link 
+    // that you can find in the Stripe Dashboard settings.
+    
+    // However, let's do it the code way assuming we rely on email:
+    const customers = await stripe.customers.list({ email: req.user.email, limit: 1 });
+    let customerId = customers.data.length > 0 ? customers.data[0].id : null;
 
+    if (!customerId) {
+        return res.status(400).json({ error: "No billing history found." });
+    }
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${process.env.CLIENT_URL}/settings`,
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // --- DATA ROUTES ---
 
 app.get('/api/expenses', authenticateToken, async (req, res) => {

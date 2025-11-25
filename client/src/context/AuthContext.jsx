@@ -1,96 +1,61 @@
-// src/context/AuthContext.jsx
+import { createContext, useState, useEffect } from "react";
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+const AuthContext = createContext();
 
-const AuthContext = createContext(null);
+// ----------------------------------------------------
+// NOTE: CHANGE THIS TO YOUR LIVE URL WHEN DEPLOYING
+// ----------------------------------------------------
+// const PROD_URL = 'http://localhost:4000/api'; 
+const PROD_URL = 'https://trackbudgetbuild.onrender.com/api'; 
 
-// 1. Define your Backend URLs explicitly (Same logic as api.js)
-const LOCAL_URL = 'http://127.0.0.1:4000/api';
-const PROD_URL = 'https://trackbudgetbuild.onrender.com/api';
-
-// 2. AUTOMATIC SWITCHER
-const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? LOCAL_URL
-  : PROD_URL;
-
-const API_URL = `${BASE_URL}/auth`;
-
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
+  // 1. On load, check if we have a token saved
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-      setUser({ email: 'User' }); 
-    }
-    setLoading(false);
+    const checkLoggedIn = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          // Verify token with backend
+          const res = await fetch(`${PROD_URL}/profile`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const userData = await res.json();
+            setUser(userData);
+          } else {
+            localStorage.removeItem('token');
+          }
+        } catch (err) {
+          console.error("Session restore failed", err);
+          localStorage.removeItem('token');
+        }
+      }
+      setLoading(false);
+    };
+    checkLoggedIn();
   }, []);
 
-  const login = async (email, password) => {
-    try {
-      console.log(`Attempting login to: ${API_URL}/login`); 
-      const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setUser(data.user);
-        setToken(data.token);
-        localStorage.setItem('token', data.token);
-        return { success: true };
-      } else {
-        return { success: false, error: data.error };
-      }
-    } catch (error) {
-      console.error("Login Network Error:", error);
-      return { success: false, error: 'Network error: Could not reach server.' };
-    }
+  // 2. Login Function
+  const login = (userData, token) => {
+    localStorage.setItem('token', token); // Save to browser memory
+    setUser(userData);
   };
 
-  const signup = async (email, password, fullName) => {
-    try {
-      console.log(`Attempting signup to: ${API_URL}/signup`);
-      const response = await fetch(`${API_URL}/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, fullName }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setUser(data.user);
-        setToken(data.token);
-        localStorage.setItem('token', data.token);
-        return { success: true };
-      } else {
-        return { success: false, error: data.error };
-      }
-    } catch (error) {
-      console.error("Signup Network Error:", error);
-      return { success: false, error: 'Network error: Could not reach server.' };
-    }
-  };
-
+  // 3. Logout Function
   const logout = () => {
+    localStorage.removeItem('token'); // Delete from memory
     setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    window.location.href = '/signup'; 
+    window.location.href = '/login'; // Force redirect
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, signup, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, PROD_URL }}>
       {!loading && children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => useContext(AuthContext);
+export default AuthContext;

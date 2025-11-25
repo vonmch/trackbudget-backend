@@ -1,5 +1,5 @@
 // src/App.jsx
-
+import LoginPage from './pages/LoginPage';
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
@@ -90,8 +90,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/login" element={<div>Login Page (Use Signup for now)</div>} /> 
-
+        <Route path="/login" element={<LoginPage />} />
         {/* Protected Routes (Dashboard & Trackers) */}
         <Route path="/*" element={<ProtectedLayout />} />
       </Routes>
