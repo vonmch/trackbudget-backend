@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import './ProfilePage.css';
 import './TrackerPage.css';
 import { formatCurrency } from '../utils/formatting'; // Import formatter
+import { authFetch } from '../utils/api';
 
 function ProfilePage() {
   const [fullName, setFullName] = useState('');
