@@ -330,10 +330,28 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   }
 });
 // -----------------------------------------------------------
+// REPLACEMENT FOR LINES 333-337
 app.post('/api/profile', authenticateToken, async (req, res) => {
-  const { full_name, email, job_description } = req.body;
-  await query(`UPDATE users SET full_name=$1, email=$2, job_description=$3 WHERE id=$4`, [full_name, email, job_description, req.user.id]);
-  res.json({ message: 'Saved' });
+  try {
+    const { full_name, email, job_description } = req.body;
+    
+    // --- THIS IS THE MISSING MAGIC FIX ---
+    // It checks if the column exists, and adds it if missing.
+    try {
+        await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS job_description TEXT');
+    } catch (e) {}
+    // -------------------------------------
+
+    await query(
+      `UPDATE users SET full_name=$1, email=$2, job_description=$3 WHERE id=$4`, 
+      [full_name, email, job_description, req.user.id]
+    );
+    
+    res.json({ message: 'Saved' });
+  } catch (err) {
+    console.error("Save profile error:", err);
+    res.status(500).json({ error: "Failed to save" });
+  }
 });
 app.put('/api/profile/password', authenticateToken, async (req, res) => {
   const { newPassword } = req.body;
