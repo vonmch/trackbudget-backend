@@ -284,10 +284,52 @@ app.get('/api/retirement/summary', authenticateToken, async (req, res) => {
   res.json(result.rows);
 });
 
+// --- UPDATED PROFILE ROUTE (Syncs with Stripe on every load) ---
 app.get('/api/profile', authenticateToken, async (req, res) => {
-  const result = await query(`SELECT full_name, email, is_premium, job_description FROM users WHERE id = $1`, [req.user.id]);
-  res.json(result.rows[0]);
+  try {
+    // 1. Get user from DB
+    const userResult = await query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    const user = userResult.rows[0];
+
+    // 2. Ask Stripe: "Is this user still paying?"
+    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    let isStripePremium = false;
+
+    if (customers.data.length > 0) {
+      const customerId = customers.data[0].id;
+      // Check active or trialing subscriptions
+      const subscriptions = await stripe.subscriptions.list({ 
+        customer: customerId,
+        status: 'all'
+      });
+      
+      const activeSub = subscriptions.data.find(sub => 
+        sub.status === 'active' || sub.status === 'trialing'
+      );
+      
+      if (activeSub) isStripePremium = true;
+    }
+
+    // 3. Sync DB if different
+    if (user.is_premium !== isStripePremium) {
+      await query('UPDATE users SET is_premium = $1 WHERE id = $2', [isStripePremium, user.id]);
+      user.is_premium = isStripePremium; 
+    }
+
+    // 4. Send back data
+    res.json({
+      full_name: user.full_name,
+      email: user.email,
+      is_premium: user.is_premium,
+      job_description: user.job_description
+    });
+
+  } catch (err) {
+    console.error("Profile sync error:", err);
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
 });
+// -----------------------------------------------------------
 app.post('/api/profile', authenticateToken, async (req, res) => {
   const { full_name, email, job_description } = req.body;
   await query(`UPDATE users SET full_name=$1, email=$2, job_description=$3 WHERE id=$4`, [full_name, email, job_description, req.user.id]);
