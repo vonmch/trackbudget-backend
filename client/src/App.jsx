@@ -1,14 +1,18 @@
-// src/App.jsx
-import LoginPage from './pages/LoginPage';
+// src/App.jsx (Final Corrected Version)
+
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom'; // Cleaned up imports
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { authFetch } from './utils/api';
+import './App.css';
+
+// Layout
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
-import './App.css';
-import { Routes, Route, Navigate } from 'react-router-dom'; 
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { authFetch } from './utils/api'; // Import authFetch
 
-// Import Pages
+// Pages
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
 import ExpenseTrackerPage from './pages/ExpenseTrackerPage'; 
 import IncomeTrackerPage from './pages/IncomeTrackerPage';
@@ -19,27 +23,19 @@ import NetWorthPage from './pages/NetWorthPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import SuccessPage from './pages/SuccessPage';
-import SignUpPage from './pages/SignUpPage';
 
-// --- Protected Layout Component ---
-// This handles the Sidebar, Navbar, and checking Premium status
 const ProtectedLayout = () => {
   const { user, loading } = useAuth();
   const [isPremium, setIsPremium] = useState(false);
 
-  // 1. Fetch Premium Status when the user loads
   useEffect(() => {
     const checkPremiumStatus = async () => {
       if (user) {
         try {
           const response = await authFetch('/profile');
           const data = await response.json();
-          
-          // --- THE FIX IS HERE ---
-          // We use '!!' to force the database value (0 or 1) into a real Boolean (false or true)
+          // Force boolean (true/false)
           setIsPremium(!!data.is_premium); 
-          console.log("Premium Status:", !!data.is_premium);
-          
         } catch (error) {
           console.error("Failed to check subscription:", error);
         }
@@ -58,8 +54,11 @@ const ProtectedLayout = () => {
         <Navbar />
         <div className="main-content">
           <Routes>
-            <Route path="/" element={<DashboardPage />} /> 
-            {/* Pass isPremium to all trackers */}
+            {/* --- THIS FIXES THE WHITE SCREEN ON LOGIN --- */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* ------------------------------------------- */}
+            
+            <Route path="/dashboard" element={<DashboardPage />} /> 
             <Route path="/expenses" element={<ExpenseTrackerPage isPremium={isPremium} />} />
             <Route path="/income" element={<IncomeTrackerPage isPremium={isPremium} />} />
             <Route path="/savings" element={<SavingsBucketsPage isPremium={isPremium} />} />
@@ -78,7 +77,6 @@ const ProtectedLayout = () => {
 
 function App() {
   useEffect(() => {
-    // Initialize Dark Mode from local storage
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-mode');
@@ -88,10 +86,9 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Public Routes */}
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
-        {/* Protected Routes (Dashboard & Trackers) */}
+        {/* Protected Routes */}
         <Route path="/*" element={<ProtectedLayout />} />
       </Routes>
     </AuthProvider>

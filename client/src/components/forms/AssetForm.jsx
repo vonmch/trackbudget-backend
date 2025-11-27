@@ -44,6 +44,9 @@ function AssetForm({ onSave, onCancel, existingAsset }) {
     try {
       await authFetch(url, {
         method: method,
+        // --- THIS HEADER WAS MISSING ---
+        headers: { 'Content-Type': 'application/json' }, 
+        // -------------------------------
         body: JSON.stringify(formData),
       });
       onSave();
