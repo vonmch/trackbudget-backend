@@ -75,21 +75,23 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (e) { res.status(500).json({ error: "Login error" }); }
 });
 
-// --- STRIPE ---
+// --- USE THIS FOR MONTHLY RECURRING BILLING ---
 app.post('/api/create-checkout-session', authenticateToken, async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
+      customer_email: req.user.email, // Lock the email
       line_items: [{
           price_data: {
             currency: 'usd',
             product_data: { name: 'TrackBudgetBuild Premium' },
             unit_amount: 2499,
+            recurring: { interval: 'month' }, // <--- MAKES IT MONTHLY
           },
           quantity: 1,
       }],
-      mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/success`,
+      mode: 'subscription', // <--- REQUIRED FOR RECURRING
+      success_url: `${process.env.CLIENT_URL}/settings`, // Send back to settings so they see the badge
       cancel_url: `${process.env.CLIENT_URL}/settings`,
     });
     res.json({ url: session.url });
