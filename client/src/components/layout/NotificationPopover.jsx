@@ -1,16 +1,14 @@
-// src/components/layout/NotificationPopover.jsx
+// src/components/layout/NotificationPopover.jsx (Fixed Crash)
 
 import React from 'react';
-import './NotificationPopover.css'; // We'll create this next
+import './NotificationPopover.css';
 import { Link } from 'react-router-dom';
 
 function NotificationPopover({ notifications }) {
   
-  // A helper function to calculate "days from now"
   const daysFromNow = (dueDate) => {
     const today = new Date();
     const due = new Date(dueDate);
-    // Calculate the difference in milliseconds, then convert to days
     const diffTime = due.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
@@ -34,8 +32,11 @@ function NotificationPopover({ notifications }) {
             {notifications.map((bill) => (
               <li key={bill.id} className="notification-item">
                 <Link to="/bills">
-                  <strong>{bill.name}</strong> (${bill.amount.toFixed(2)}) 
+                  {/* --- THE FIX IS HERE --- */}
+                  {/* We convert the text string to a float number before formatting */}
+                  <strong>{bill.name}</strong> (${parseFloat(bill.amount).toFixed(2)}) 
                   is {daysFromNow(bill.due_date)}.
+                  {/* ----------------------- */}
                 </Link>
               </li>
             ))}
