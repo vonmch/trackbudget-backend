@@ -104,20 +104,11 @@ app.put('/api/profile/upgrade', authenticateToken, async (req, res) => {
     res.status(200).json({ message: 'Upgraded to Premium!' });
   } catch (error) { res.status(500).json({ error: 'Failed to upgrade' }); }
 });
+
 // --- STRIPE CUSTOMER PORTAL (Manage Subscription) ---
 app.post('/api/create-portal-session', authenticateToken, async (req, res) => {
   try {
-    // 1. Get user from DB to find their Stripe Customer ID
-    // (Note: In a perfect world, we save the 'stripe_customer_id' in the users table.
-    // Since we didn't do that earlier, we will just rely on email matching for now, 
-    // but ideally, you should save customer_id during checkout).
-    
-    // For this quick fix, we send them to the general portal login or create a session if we had the ID.
-    // Since we missed saving the 'stripe_customer_id' in step 1, 
-    // the easiest way for your client is to direct users to the BILLING Portal link 
-    // that you can find in the Stripe Dashboard settings.
-    
-    // However, let's do it the code way assuming we rely on email:
+    // 1. Find the customer by email
     const customers = await stripe.customers.list({ email: req.user.email, limit: 1 });
     let customerId = customers.data.length > 0 ? customers.data[0].id : null;
 
@@ -136,6 +127,7 @@ app.post('/api/create-portal-session', authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // --- DATA ROUTES ---
 
 app.get('/api/expenses', authenticateToken, async (req, res) => {
@@ -293,24 +285,29 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
     const userResult = await query('SELECT * FROM users WHERE id = $1', [req.user.id]);
     const user = userResult.rows[0];
 
-    // 2. Ask Stripe: "Is this user still paying?"
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // --- ADMIN BYPASS (New Code) ---
+    // This allows YOUR email to be Premium forever without paying
     let isStripePremium = false;
 
-    if (customers.data.length > 0) {
-      const customerId = customers.data[0].id;
-      // Check active or trialing subscriptions
-      const subscriptions = await stripe.subscriptions.list({ 
-        customer: customerId,
-        status: 'all'
-      });
-      
-      const activeSub = subscriptions.data.find(sub => 
-        sub.status === 'active' || sub.status === 'trialing'
-      );
-      
-      if (activeSub) isStripePremium = true;
+    if (user.email === 'vjshah0411@gmail.com') {
+        isStripePremium = true; 
+    } 
+    else {
+        // Only check Stripe for everyone else
+        const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+        if (customers.data.length > 0) {
+          const customerId = customers.data[0].id;
+          const subscriptions = await stripe.subscriptions.list({ 
+            customer: customerId,
+            status: 'all'
+          });
+          const activeSub = subscriptions.data.find(sub => 
+            sub.status === 'active' || sub.status === 'trialing'
+          );
+          if (activeSub) isStripePremium = true;
+        }
     }
+    // ------------------------------------
 
     // 3. Sync DB if different
     if (user.is_premium !== isStripePremium) {
@@ -331,18 +328,16 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch profile" });
   }
 });
-// -----------------------------------------------------------
-// REPLACEMENT FOR LINES 333-337
+
+// --- SAVE PROFILE ROUTE ---
 app.post('/api/profile', authenticateToken, async (req, res) => {
   try {
     const { full_name, email, job_description } = req.body;
     
-    // --- THIS IS THE MISSING MAGIC FIX ---
-    // It checks if the column exists, and adds it if missing.
+    // DB Repair
     try {
         await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS job_description TEXT');
     } catch (e) {}
-    // -------------------------------------
 
     await query(
       `UPDATE users SET full_name=$1, email=$2, job_description=$3 WHERE id=$4`, 
@@ -355,6 +350,7 @@ app.post('/api/profile', authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to save" });
   }
 });
+
 app.put('/api/profile/password', authenticateToken, async (req, res) => {
   const { newPassword } = req.body;
   const hashed = await bcrypt.hash(newPassword, 10);
@@ -382,7 +378,6 @@ app.get('/api/history', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/notifications', authenticateToken, async (req, res) => {
-  // CRASH FIX: Added ::date casting to make Postgres happy comparing Text vs Date
   const sql = `
     SELECT * FROM bills 
     WHERE user_id = $1 
@@ -398,7 +393,6 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
 // --- DEPLOYMENT GLUE CODE (SERVE VITE APP) ---
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
-// FIX: Use Regex /.*/ to match everything (Bypasses Express 5 strict syntax)
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
 });
