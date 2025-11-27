@@ -1,4 +1,4 @@
-// src/pages/NetWorthPage.jsx
+// src/pages/NetWorthPage.jsx (Fixed Data Parsing)
 
 import React, { useState, useEffect, useMemo } from 'react';
 import './NetWorthPage.css';
@@ -30,7 +30,6 @@ const BASE_COLOR_MAP = {
   'Other': '#8884D8',
 };
 
-// 1. Accept 'isPremium' prop
 function NetWorthPage({ isPremium }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [assets, setAssets] = useState([]);
@@ -40,7 +39,16 @@ function NetWorthPage({ isPremium }) {
     try {
       const response = await authFetch('/assets'); 
       const data = await response.json();
-      setAssets(data);
+      
+      // --- THE FIX IS HERE ---
+      // We loop through every asset and force 'worth' to be a Number
+      const cleanData = data.map(asset => ({
+        ...asset,
+        worth: parseFloat(asset.worth) || 0 
+      }));
+      // -----------------------
+
+      setAssets(cleanData);
     } catch (error) {
       console.error('Error fetching assets:', error);
     }
@@ -67,11 +75,14 @@ function NetWorthPage({ isPremium }) {
   };
 
   const calculations = useMemo(() => {
+    // Now that 'worth' is definitely a number, this math won't crash
     const totalNetWorth = assets.reduce((sum, asset) => sum + asset.worth, 0);
+    
     const groupedByType = assets.reduce((acc, asset) => {
       acc[asset.type] = (acc[asset.type] || 0) + asset.worth;
       return acc;
     }, {});
+    
     const assetTypes = Object.keys(groupedByType);
     const finalTypeColorMap = {};
     assetTypes.forEach(type => {
@@ -85,7 +96,6 @@ function NetWorthPage({ isPremium }) {
     return { totalNetWorth, chartData, assetTypes, finalTypeColorMap };
   }, [assets]);
 
-  // 2. Handle Lock
   const handleAddClick = () => {
     if (isPremium) {
       openCreateModal();
@@ -103,17 +113,19 @@ function NetWorthPage({ isPremium }) {
             <strong>{formatCurrency(calculations.totalNetWorth)}</strong>
           </div>
           <div className="graph-container">
-            <HorizontalStackedBar 
-              data={calculations.chartData} 
-              types={calculations.assetTypes}
-              typeColorMap={calculations.finalTypeColorMap}
-            />
+            {/* We only render graph if we have data, preventing empty graph crashes */}
+            {assets.length > 0 && (
+                <HorizontalStackedBar 
+                data={calculations.chartData} 
+                types={calculations.assetTypes}
+                typeColorMap={calculations.finalTypeColorMap}
+                />
+            )}
           </div>
         </div>
 
         <div className="data-container" style={{width: "100%"}}>
           <h3>Assets</h3>
-          {/* 3. Apply Lock */}
           <button 
             className="add-new-btn" 
             onClick={handleAddClick}
@@ -136,6 +148,7 @@ function NetWorthPage({ isPremium }) {
                       <tr key={asset.id}>
                         <td>{asset.name}</td>
                         <td>{asset.type}</td>
+                        {/* We safely format the number here */}
                         <td>{formatCurrency(asset.worth)}</td>
                         <td>
                           <button className="edit-btn" onClick={() => openEditModal(asset)}>Edit</button>
