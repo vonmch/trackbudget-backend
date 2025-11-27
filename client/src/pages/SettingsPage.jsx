@@ -1,17 +1,20 @@
-// src/pages/SettingsPage.jsx (Updated with Portal Logic)
+// src/pages/SettingsPage.jsx (Final Version with Logout)
 
 import React, { useState, useEffect } from 'react';
 import './SettingsPage.css';
 import './TrackerPage.css';
-import { authFetch } from '../utils/api'; // Import helper
+import { authFetch } from '../utils/api'; 
+import { useAuth } from '../context/AuthContext'; // <--- ADDED THIS IMPORT
 
 function SettingsPage() {
+  const { logout } = useAuth(); // <--- ADDED THIS HOOK
+  
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [isPremium, setIsPremium] = useState(false); // State for premium status
+  const [isPremium, setIsPremium] = useState(false); 
 
   useEffect(() => {
     if (isDarkMode) {
@@ -68,7 +71,7 @@ function SettingsPage() {
     }
   };
 
-  // --- NEW HANDLER: MANAGE EXISTING SUBSCRIPTION ---
+  // --- HANDLER: MANAGE EXISTING SUBSCRIPTION ---
   const handleManageSubscription = async () => {
     try {
       const response = await authFetch('/create-portal-session', {
@@ -124,7 +127,6 @@ function SettingsPage() {
             <p className="premium-badge">🌟 You are a Premium Member!</p>
             <p style={{marginBottom: '15px'}}>Thank you for supporting TrackBudgetBuild.</p>
             
-            {/* NEW BUTTON FOR PREMIUM USERS */}
             <button className="btn-manage-subscription" onClick={handleManageSubscription} style={{backgroundColor: '#555'}}>
               Manage Subscription / Cancel
             </button>
@@ -154,6 +156,19 @@ function SettingsPage() {
         </div>
       </div>
       
+      {/* --- ADDED LOGOUT SECTION HERE --- */}
+      <div className="data-container" style={{ textAlign: 'center' }}>
+        <h3>Session</h3>
+        <button 
+          onClick={logout} 
+          className="btn-save-settings" 
+          style={{ backgroundColor: '#666', width: '100%', marginTop: '10px' }}
+        >
+          Log Out
+        </button>
+      </div>
+      {/* -------------------------------- */}
+
       <div className="data-container danger-zone">
         <h3>Danger Zone</h3>
         <p>Deleting your account is permanent.</p>
