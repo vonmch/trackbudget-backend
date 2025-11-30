@@ -1,98 +1,69 @@
 /* src/App.css */
 
 :root {
-  /* --- LIGHT MODE VARIABLES (Default) --- */
-  --bg-primary: #f4f7fa;       /* Light Grey Background */
-  --bg-secondary: #ffffff;     /* White Cards/Nav */
-  --text-primary: #333333;     /* Dark Grey Text (Essential for visibility) */
-  --text-secondary: #555555;   /* Medium Grey Text */
-  --border-color: #e0e0e0;     /* Light Borders */
-  --hover-bg: #f4f7fa;         /* Hover Color */
-  --table-header-bg: #f9f9f9;  /* Table Header Background */
-  
-  /* Sidebar Colors */
-  --sidebar-active-bg: #e6f7ff;
-  --sidebar-active-text: #096dd9;
+  /* --- LIGHT MODE VARIABLES --- */
+  --bg-primary: #f4f7fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --border-color: #e0e0e0;
+  --input-bg: #ffffff;
 }
 
 /* --- DARK MODE VARIABLES --- */
 body.dark-mode {
   --bg-primary: #1a1a2d;       /* Dark Blue/Black Background */
   --bg-secondary: #282844;     /* Dark Purple/Grey Cards */
-  --text-primary: #f0f0f0;     /* White Text (Essential for visibility) */
-  --text-secondary: #a9a9c0;   /* Light Grey Text */
+  --text-primary: #ffffff;     /* Pure White Text */
+  --text-secondary: #d0d0e0;   /* Light Grey Text */
   --border-color: #4a4a6a;     /* Dark Borders */
-  --hover-bg: #3a3a5a;         /* Dark Hover */
-  --table-header-bg: #323250;  /* Dark Table Header */
-
-  /* Sidebar Colors */
-  --sidebar-active-bg: #1677ff;
-  --sidebar-active-text: #ffffff;
+  --input-bg: #1a1a2d;         /* Dark Inputs */
 }
 
-/* --- GLOBAL STYLES --- */
-body {
+/* --- GLOBAL LAYOUT FIXES --- */
+html, body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  
-  /* Apply the variables here! */
-  background-color: var(--bg-primary);
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  /* This fixes the white border on scroll */
+  background-color: var(--bg-primary); 
   color: var(--text-primary);
-  
+  font-family: system-ui, -apple-system, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .app-layout {
   display: flex;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Stop double scrollbars */
 }
 
 .main-view {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow-y: auto;
+  height: 100%;
+  overflow-y: auto; /* Allow scrolling INSIDE the main view */
+  background-color: var(--bg-primary);
 }
 
 .main-content {
   padding: 24px;
-  background-color: var(--bg-primary); /* Variable */
   flex-grow: 1;
-  min-height: calc(100vh - 60px); 
-  transition: background-color 0.3s ease;
+  /* Ensure content pushes background all the way down */
+  min-height: 100%; 
 }
 
-/* --- GLOBAL BUTTON STYLES --- */
-.edit-btn {
-  background-color: #1677ff;
-  color: white;
-  border: none;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 8px;
-}
-.edit-btn:hover {
-  background-color: #096dd9;
-}
+/* --- GLOBAL COMPONENT STYLES --- */
 
-.delete-btn {
-  background-color: #ff4d4f;
-  color: white;
-  border: none;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.delete-btn:hover {
-  background-color: #cf1322;
-}
+/* Buttons */
+.edit-btn { background-color: #1677ff; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; margin-right: 8px; }
+.delete-btn { background-color: #ff4d4f; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
 
-/* =========================================
-   DARK MODE FIXES (UPDATED & EXPANDED)
-   ========================================= */
+/* --- DARK MODE OVERRIDES --- */
 
-/* 1. Force ALL Cards, Modals, and Popovers to Dark Grey */
+/* 1. Force Cards/Modals to Dark Grey */
 body.dark-mode .savings-bucket-card, 
 body.dark-mode .bucket-card,
 body.dark-mode .bill-card, 
@@ -100,52 +71,40 @@ body.dark-mode .upcoming-bill-card,
 body.dark-mode .networth-summary-card,
 body.dark-mode .chart-card,
 body.dark-mode .stat-card,
-body.dark-mode .modal-content,       /* <--- Fixes Modals (Add Expense, etc) */
-body.dark-mode .notification-popover /* <--- Fixes Bell Notification */
-{
-  background-color: #282844 !important; 
+body.dark-mode .modal-content,
+body.dark-mode .notification-popover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* 2. Fix Input Labels (The "Black on Black" Fix) */
+body.dark-mode label, 
+body.dark-mode h3, 
+body.dark-mode h4,
+body.dark-mode strong {
   color: #ffffff !important;
-  border: 1px solid #4a4a6a;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.4);
 }
 
-/* 2. Fix Header Text inside those containers */
-body.dark-mode .modal-content h3,
-body.dark-mode .popover-header,
-body.dark-mode .notification-item strong {
-    color: #ffffff !important;
-}
-
-/* 3. Fix Subtext Visibility (prevent gray text on gray background) */
-body.dark-mode .savings-bucket-card p,
-body.dark-mode .savings-bucket-card span,
-body.dark-mode .bill-card p,
-body.dark-mode .stat-card .stat-label,
-body.dark-mode .notification-item {
-  color: #d0d0e0 !important; /* Lighter Grey for readability */
-}
-
-/* 4. Fix Input Fields (prevent white background in dark mode) */
+/* 3. Fix Input Fields & Dropdowns */
 body.dark-mode input, 
 body.dark-mode select, 
 body.dark-mode textarea {
-  background-color: #1a1a2d; /* Dark background */
-  color: #ffffff;            /* White text */
-  border: 1px solid #4a4a6a;
-}
-
-/* 5. Fix Close Buttons (X) */
-body.dark-mode .close-btn, 
-body.dark-mode button.close {
-    color: #ffffff;
-    background: transparent;
-}
-
-/* 6. Fix Table Striping */
-body.dark-mode tr:nth-child(even) {
-  background-color: #2f2f4f; 
-}
-body.dark-mode th {
-  background-color: #282844;
+  background-color: var(--input-bg);
   color: #ffffff;
+  border: 1px solid #555;
 }
+
+/* 4. Fix Secondary Text (Dates, Subtitles) */
+body.dark-mode p, 
+body.dark-mode span, 
+body.dark-mode .stat-label,
+body.dark-mode .notification-item {
+  color: var(--text-secondary);
+}
+
+/* 5. Fix Tables */
+body.dark-mode tr:nth-child(even) { background-color: #2f2f4f; }
+body.dark-mode th { background-color: var(--bg-secondary); color: #fff; }
+body.dark-mode td { color: #ddd; }

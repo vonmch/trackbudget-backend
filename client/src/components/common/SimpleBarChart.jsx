@@ -9,28 +9,27 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip,
-  Cell // 1. Import 'Cell'
+  Legend,
+  Cell 
 } from 'recharts';
 
-// 2. Define our specific colors for each bill type
-const COLOR_MAP = {
-  'Utility Bill': '#0088FE', // Blue
-  'Insurance': '#00C49F', // Teal
-  'Rent': '#FFBB28', // Yellow
-  'Mortgage': '#FF8042', // Orange
-  'Subscription': '#8884D8', // Purple
-  'Other': '#A9A9A9', // Grey
+// 1. Keep your specific colors for Bills
+const BILL_COLOR_MAP = {
+  'Utility Bill': '#0088FE',
+  'Insurance': '#00C49F',
+  'Rent': '#FFBB28',
+  'Mortgage': '#FF8042',
+  'Subscription': '#8884D8',
+  'Other': '#A9A9A9',
 };
 
-// Custom Tooltip for the bar chart
+// 2. Custom Tooltip (Only used for Bills)
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    // 3. The 'fill' color is now passed in the payload!
-    const barColor = payload[0].fill; 
     return (
-      <div className="custom-tooltip">
-        <p className="label">{`${label}`}</p>
-        <p className="intro" style={{ color: barColor }}>
+      <div style={{ backgroundColor: '#fff', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
+        <p style={{ fontWeight: 'bold', margin: 0, color: '#333' }}>{label}</p>
+        <p style={{ margin: 0, color: payload[0].fill }}>
           {`Total: $${payload[0].value.toFixed(2)}`}
         </p>
       </div>
@@ -40,31 +39,58 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 function SimpleBarChart({ data }) {
+  // SAFETY CHECK: If no data, return empty container
+  if (!data || data.length === 0) return <div style={{ height: '300px' }}></div>;
+
+  // 3. SMART DETECTION: Are we on the Dashboard?
+  // We check if the first item has "Income" or "Expenses" keys
+  const isDashboardData = 'Income' in data[0] || 'Expenses' in data[0];
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart 
         data={data}
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-        <XAxis dataKey="name" stroke="#666" fontSize={12} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#444" vertical={false} />
+        
+        {/* Axis Styles */}
+        <XAxis dataKey="name" stroke="#888" tick={{ fill: '#888' }} fontSize={12} />
         <YAxis 
-          stroke="#666" 
+          stroke="#888" 
+          tick={{ fill: '#888' }} 
           fontSize={12} 
           tickFormatter={(value) => `$${value}`} 
         />
-        <Tooltip content={<CustomTooltip />} />
-        
-        {/* 4. This is the magic! */}
-        <Bar dataKey="total">
-          {/* We map over the data and give each bar a unique 'Cell' with a color */}
-          {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
-              fill={COLOR_MAP[entry.name] || '#A9A9A9'} // Find the color in our map, or default to grey
+
+        {/* 4. CONDITIONAL RENDER: Dashboard vs Bills */}
+        {isDashboardData ? (
+          <>
+            {/* --- DASHBOARD MODE (Income vs Expense) --- */}
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#333', border: 'none', borderRadius: '8px', color: '#fff' }}
+              itemStyle={{ color: '#fff' }}
+              formatter={(value) => `$${value.toFixed(2)}`}
             />
-          ))}
-        </Bar>
+            <Legend wrapperStyle={{ paddingTop: '10px' }} />
+            <Bar dataKey="Income" fill="#4CAF50" radius={[4, 4, 0, 0]} name="Income" />
+            <Bar dataKey="Expenses" fill="#F44336" radius={[4, 4, 0, 0]} name="Expenses" />
+          </>
+        ) : (
+          <>
+            {/* --- BILL MODE (Original Logic) --- */}
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="total" name="Total Bill">
+              {data.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={BILL_COLOR_MAP[entry.name] || '#A9A9A9'} 
+                />
+              ))}
+            </Bar>
+          </>
+        )}
+
       </BarChart>
     </ResponsiveContainer>
   );
