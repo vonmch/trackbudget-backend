@@ -89,32 +89,43 @@ body {
 }
 
 /* =========================================
-   DARK MODE FIXES (ADDED NEW SECTIONS)
+   DARK MODE FIXES (UPDATED & EXPANDED)
    ========================================= */
 
-/* 1. Force Cards to Dark Grey in Dark Mode */
+/* 1. Force ALL Cards, Modals, and Popovers to Dark Grey */
 body.dark-mode .savings-bucket-card, 
 body.dark-mode .bucket-card,
 body.dark-mode .bill-card, 
 body.dark-mode .upcoming-bill-card,
 body.dark-mode .networth-summary-card,
 body.dark-mode .chart-card,
-body.dark-mode .stat-card {
-  background-color: #282844 !important; /* Matches var(--bg-secondary) */
+body.dark-mode .stat-card,
+body.dark-mode .modal-content,       /* <--- Fixes Modals (Add Expense, etc) */
+body.dark-mode .notification-popover /* <--- Fixes Bell Notification */
+{
+  background-color: #282844 !important; 
   color: #ffffff !important;
   border: 1px solid #4a4a6a;
   box-shadow: 0 4px 6px rgba(0,0,0,0.4);
 }
 
-/* 2. Fix Subtext Visibility (prevent gray text on gray background) */
+/* 2. Fix Header Text inside those containers */
+body.dark-mode .modal-content h3,
+body.dark-mode .popover-header,
+body.dark-mode .notification-item strong {
+    color: #ffffff !important;
+}
+
+/* 3. Fix Subtext Visibility (prevent gray text on gray background) */
 body.dark-mode .savings-bucket-card p,
 body.dark-mode .savings-bucket-card span,
 body.dark-mode .bill-card p,
-body.dark-mode .stat-card .stat-label {
+body.dark-mode .stat-card .stat-label,
+body.dark-mode .notification-item {
   color: #d0d0e0 !important; /* Lighter Grey for readability */
 }
 
-/* 3. Fix Input Fields (prevent white background in dark mode) */
+/* 4. Fix Input Fields (prevent white background in dark mode) */
 body.dark-mode input, 
 body.dark-mode select, 
 body.dark-mode textarea {
@@ -123,9 +134,16 @@ body.dark-mode textarea {
   border: 1px solid #4a4a6a;
 }
 
-/* 4. Fix Table Striping */
+/* 5. Fix Close Buttons (X) */
+body.dark-mode .close-btn, 
+body.dark-mode button.close {
+    color: #ffffff;
+    background: transparent;
+}
+
+/* 6. Fix Table Striping */
 body.dark-mode tr:nth-child(even) {
-  background-color: #2f2f4f; /* Slightly lighter than base */
+  background-color: #2f2f4f; 
 }
 body.dark-mode th {
   background-color: #282844;
