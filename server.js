@@ -15,6 +15,9 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key'; 
 
+// --- ADMIN EMAILS ---
+const ADMIN_EMAILS = ['vjshah0411@gmail.com', 'HindreenOfficial@gmail.com'];
+
 app.use(cors());
 app.use(express.json());
 
@@ -52,8 +55,10 @@ app.post('/api/auth/signup', async (req, res) => {
     if (existing.rows.length > 0) return res.status(400).json({ error: "User exists" });
 
     const hashed = await bcrypt.hash(password, 10);
+    // Modified to include created_at and last_login
     const result = await query(
-      `INSERT INTO users (email, password, full_name, is_premium) VALUES ($1, $2, $3, false) RETURNING id`, 
+      `INSERT INTO users (email, password, full_name, is_premium, created_at, last_login) 
+       VALUES ($1, $2, $3, false, NOW(), NOW()) RETURNING id`, 
       [email, hashed, fullName || '']
     );
     const userId = result.rows[0].id;
@@ -70,9 +75,33 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(403).json({ error: "Invalid credentials" });
     }
+    
+    // Update last_login
+    await query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
     res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name, is_premium: user.is_premium } });
   } catch (e) { res.status(500).json({ error: "Login error" }); }
+});
+
+// --- ADMIN ROUTE (Fetch All Users) ---
+app.get('/api/admin/users', authenticateToken, async (req, res) => {
+    // Only allow specific admins
+    if (!ADMIN_EMAILS.includes(req.user.email)) {
+        return res.sendStatus(403); // Forbidden
+    }
+
+    try {
+        const result = await query(`
+            SELECT id, full_name, email, is_premium, created_at, last_login 
+            FROM users 
+            ORDER BY created_at DESC
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Admin fetch error:", error);
+        res.status(500).json({ error: "Failed to fetch users" });
+    }
 });
 
 // --- USE THIS FOR MONTHLY RECURRING BILLING ---
@@ -285,11 +314,11 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
     const userResult = await query('SELECT * FROM users WHERE id = $1', [req.user.id]);
     const user = userResult.rows[0];
 
-    // --- ADMIN BYPASS (New Code) ---
-    // This allows YOUR email to be Premium forever without paying
+    // --- ADMIN BYPASS ---
+    // Allows YOUR admins to be Premium forever without paying
     let isStripePremium = false;
 
-    if (user.email === 'vjshah0411@gmail.com') {
+    if (ADMIN_EMAILS.includes(user.email)) {
         isStripePremium = true; 
     } 
     else {
@@ -334,7 +363,7 @@ app.post('/api/profile', authenticateToken, async (req, res) => {
   try {
     const { full_name, email, job_description } = req.body;
     
-    // DB Repair
+    // DB Repair: Ensure column exists
     try {
         await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS job_description TEXT');
     } catch (e) {}
@@ -423,6 +452,11 @@ app.get(/.*/, (req, res) => {
     for (const sql of tables) {
       await query(sql);
     }
+
+    // 2. DB MIGRATION: Add new columns to 'users' if missing
+    try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()'); } catch(e) {}
+    try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP DEFAULT NOW()'); } catch(e) {}
+
     console.log('Connected to PostgreSQL & Tables Initialized.');
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 

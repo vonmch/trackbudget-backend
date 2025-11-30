@@ -1,7 +1,7 @@
-// src/App.jsx (Final Corrected Version)
+// src/App.jsx (Final Version with Admin Route)
 
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom'; // Cleaned up imports
+import { Routes, Route, Navigate } from 'react-router-dom'; 
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { authFetch } from './utils/api';
 import './App.css';
@@ -23,6 +23,7 @@ import NetWorthPage from './pages/NetWorthPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import SuccessPage from './pages/SuccessPage';
+import AdminPanelPage from './pages/AdminPanelPage'; // <--- Admin Page Import
 
 const ProtectedLayout = () => {
   const { user, loading } = useAuth();
@@ -54,9 +55,8 @@ const ProtectedLayout = () => {
         <Navbar />
         <div className="main-content">
           <Routes>
-            {/* --- THIS FIXES THE WHITE SCREEN ON LOGIN --- */}
+            {/* Redirect root "/" to "/dashboard" immediately */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            {/* ------------------------------------------- */}
             
             <Route path="/dashboard" element={<DashboardPage />} /> 
             <Route path="/expenses" element={<ExpenseTrackerPage isPremium={isPremium} />} />
@@ -68,6 +68,11 @@ const ProtectedLayout = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/success" element={<SuccessPage />} />
+            
+            {/* --- NEW ADMIN ROUTE --- */}
+            <Route path="/admin" element={<AdminPanelPage />} />
+            {/* ----------------------- */}
+
           </Routes>
         </div>
       </div>
@@ -86,8 +91,10 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Public Routes */}
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
+        
         {/* Protected Routes */}
         <Route path="/*" element={<ProtectedLayout />} />
       </Routes>
