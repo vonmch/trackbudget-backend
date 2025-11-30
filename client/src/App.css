@@ -87,3 +87,47 @@ body {
 .delete-btn:hover {
   background-color: #cf1322;
 }
+
+/* =========================================
+   DARK MODE FIXES (ADDED NEW SECTIONS)
+   ========================================= */
+
+/* 1. Force Cards to Dark Grey in Dark Mode */
+body.dark-mode .savings-bucket-card, 
+body.dark-mode .bucket-card,
+body.dark-mode .bill-card, 
+body.dark-mode .upcoming-bill-card,
+body.dark-mode .networth-summary-card,
+body.dark-mode .chart-card,
+body.dark-mode .stat-card {
+  background-color: #282844 !important; /* Matches var(--bg-secondary) */
+  color: #ffffff !important;
+  border: 1px solid #4a4a6a;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+}
+
+/* 2. Fix Subtext Visibility (prevent gray text on gray background) */
+body.dark-mode .savings-bucket-card p,
+body.dark-mode .savings-bucket-card span,
+body.dark-mode .bill-card p,
+body.dark-mode .stat-card .stat-label {
+  color: #d0d0e0 !important; /* Lighter Grey for readability */
+}
+
+/* 3. Fix Input Fields (prevent white background in dark mode) */
+body.dark-mode input, 
+body.dark-mode select, 
+body.dark-mode textarea {
+  background-color: #1a1a2d; /* Dark background */
+  color: #ffffff;            /* White text */
+  border: 1px solid #4a4a6a;
+}
+
+/* 4. Fix Table Striping */
+body.dark-mode tr:nth-child(even) {
+  background-color: #2f2f4f; /* Slightly lighter than base */
+}
+body.dark-mode th {
+  background-color: #282844;
+  color: #ffffff;
+}

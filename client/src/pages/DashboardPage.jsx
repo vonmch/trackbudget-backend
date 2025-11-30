@@ -1,128 +1,120 @@
 // src/pages/DashboardPage.jsx
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import './DashboardPage.css';
 import StatCard from '../components/common/StatCard';
-import DonutChart from '../components/common/DonutChart';
-import LineGraph from '../components/common/LineGraph';
-import { Link } from 'react-router-dom';
+import SimpleBarChart from '../components/common/SimpleBarChart';
 import UpcomingBillsCard from '../components/common/UpcomingBillsCard';
+import { authFetch } from '../utils/api'; 
 import { formatCurrency } from '../utils/formatting';
-import { authFetch } from '../utils/api'; // <--- 1. IMPORT THIS
-
-const NetWorthIcon = () => <span>💰</span>;
-const IncomeIcon = () => <span>📈</span>;
-const ExpensesIcon = () => <span>📉</span>;
-
-const dashboardGraphLines = [
-  { dataKey: 'Income', color: '#2ed47a' },
-  { dataKey: 'Expenses', color: '#ff4d4f' }
-];
 
 function DashboardPage() {
-  const [assets, setAssets] = useState([]);
-  const [income, setIncome] = useState([]);
-  const [expenses, setExpenses] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // State for the Totals
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [netWorth, setNetWorth] = useState(0);
+  
+  // State for Charts & Lists
+  const [bills, setBills] = useState([]);
+  const [recentTransactions, setRecentTransactions] = useState([]); // For chart
 
   useEffect(() => {
-    const fetchAllData = async () => {
+    const fetchData = async () => {
       try {
-        // 2. USE authFetch (and remove the full URL part)
-        const [assetsRes, incomeRes, expensesRes] = await Promise.all([
-          authFetch('/assets'),
-          authFetch('/income'),
-          authFetch('/expenses')
-        ]);
-        const assetsData = await assetsRes.json();
+        // 1. Fetch Expenses
+        const expenseRes = await authFetch('/expenses');
+        const expenseData = await expenseRes.json();
+        const expenseSum = expenseData.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+        setTotalExpenses(expenseSum);
+
+        // 2. Fetch Income
+        const incomeRes = await authFetch('/income');
         const incomeData = await incomeRes.json();
-        const expensesData = await expensesRes.json();
-        setAssets(assetsData);
-        setIncome(incomeData);
-        setExpenses(expensesData);
+        const incomeSum = incomeData.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+        setTotalIncome(incomeSum);
+
+        // 3. Fetch Assets (Net Worth)
+        const assetRes = await authFetch('/assets');
+        const assetData = await assetRes.json();
+        const assetSum = assetData.reduce((sum, item) => sum + (parseFloat(item.worth) || 0), 0);
+        setNetWorth(assetSum);
+
+        // 4. Fetch Bills
+        const billsRes = await authFetch('/bills');
+        const billsData = await billsRes.json();
+        // Filter for unpaid bills only
+        const unpaidBills = billsData.filter(bill => !bill.is_paid);
+        setBills(unpaidBills.slice(0, 3)); // Show top 3
+
+        // 5. Setup Chart Data (Simple comparison)
+        // (This assumes you want to show Income vs Expense for the whole history)
+        // Ideally, you'd filter this by month, but this works for a total overview
+        setRecentTransactions([
+            { name: 'Total', Income: incomeSum, Expenses: expenseSum }
+        ]);
+
       } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Error loading dashboard data:", error);
       }
     };
-    fetchAllData();
+
+    fetchData();
   }, []);
-
-  const dashboardData = useMemo(() => {
-    const totalNetWorth = assets.reduce((sum, asset) => sum + asset.worth, 0);
-    const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
-    const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
-    const donutData = [
-      { name: 'Wants', value: expenses.filter(e => e.want_or_need === 'want').reduce((sum, e) => sum + e.amount, 0) },
-      { name: 'Needs', value: expenses.filter(e => e.want_or_need === 'need').reduce((sum, e) => sum + e.amount, 0) },
-    ];
-    const dailyTotals = {};
-    income.forEach(item => {
-      const date = item.date;
-      dailyTotals[date] = { ...dailyTotals[date], Income: (dailyTotals[date]?.Income || 0) + item.amount };
-    });
-    expenses.forEach(item => {
-      const date = item.date;
-      dailyTotals[date] = { ...dailyTotals[date], Expenses: (dailyTotals[date]?.Expenses || 0) + item.amount };
-    });
-    const dataArray = Object.keys(dailyTotals).map(date => ({
-      date: date,
-      Income: dailyTotals[date].Income || 0,
-      Expenses: dailyTotals[date].Expenses || 0,
-    }));
-    dataArray.sort((a, b) => new Date(a.date) - new Date(b.date));
-    const lineData = dataArray.map(item => ({
-      name: new Date(item.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }),
-      Income: item.Income,
-      Expenses: item.Expenses,
-    }));
-    return { totalNetWorth, totalIncome, totalExpenses, donutData, lineData };
-  }, [assets, income, expenses]);
-
-  if (isLoading) {
-    return <div className="dashboard-page"><h2>Loading Dashboard Data...</h2></div>;
-  }
 
   return (
     <div className="dashboard-page">
-      <div className="dashboard-grid-3-col">
-        <Link to="/networth" className="dashboard-link">
-          <StatCard 
-            icon={<NetWorthIcon />} 
-            title="Total Net Worth" 
-            value={formatCurrency(dashboardData.totalNetWorth)}
-          />
-        </Link>
-        <Link to="/income" className="dashboard-link">
-          <StatCard 
-            icon={<IncomeIcon />} 
-            title="Total Income" 
-            value={formatCurrency(dashboardData.totalIncome)} 
-          />
-        </Link>
-        <Link to="/expenses" className="dashboard-link">
-          <StatCard 
-            icon={<ExpensesIcon />} 
-            title="Total Expenses" 
-            value={formatCurrency(dashboardData.totalExpenses)} 
-          />
-        </Link>
+      <h2>Dashboard</h2>
+      
+      {/* STAT CARDS ROW */}
+      <div className="stats-grid">
+        <StatCard 
+          title="Total Net Worth" 
+          value={formatCurrency(netWorth)} 
+          icon="💰" 
+          color="#FFD700" 
+        />
+        <StatCard 
+          title="Total Income" 
+          value={formatCurrency(totalIncome)} 
+          icon="📈" 
+          color="#4CAF50" 
+        />
+        <StatCard 
+          title="Total Expenses" 
+          value={formatCurrency(totalExpenses)} 
+          icon="📉" 
+          color="#F44336" 
+        />
       </div>
 
-      <div className="dashboard-grid-2-col">
-        <div className="dashboard-card">
-          <h3 className="card-title">Expense Breakdown</h3>
-          <DonutChart data={dashboardData.donutData} />
-        </div>
-        <div className="dashboard-card">
-          <h3 className="card-title">Income vs. Expense</h3>
-          <LineGraph data={dashboardData.lineData} lines={dashboardGraphLines} />
+      {/* CHARTS ROW */}
+      <div className="charts-grid">
+        <div className="chart-card">
+          <h3>Income vs. Expenses</h3>
+          {/* Reusing your bar chart logic */}
+          <div style={{ width: '100%', height: '300px' }}>
+             <SimpleBarChart data={recentTransactions} />
+          </div>
         </div>
       </div>
-      
-      <div className="dashboard-grid-1-col">
-        <UpcomingBillsCard />
+
+      {/* BILLS ROW */}
+      <div className="bills-section">
+        <h3>Upcoming Bills</h3>
+        <div className="bills-grid">
+          {bills.length === 0 ? (
+            <p style={{ color: '#888', padding: '20px' }}>No upcoming bills found.</p>
+          ) : (
+            bills.map(bill => (
+              <UpcomingBillsCard 
+                key={bill.id} 
+                name={bill.name} 
+                amount={bill.amount} 
+                dueDate={bill.due_date} 
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
