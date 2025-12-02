@@ -1,4 +1,4 @@
-// src/pages/DashboardPage.jsx (Fixed Layout)
+// src/pages/DashboardPage.jsx
 
 import React, { useState, useEffect } from 'react';
 import './DashboardPage.css';
@@ -22,7 +22,7 @@ function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Fetch Expenses
+        // 1. Fetch Expenses & Pie Data
         const expenseRes = await authFetch('/expenses');
         const expenseData = await expenseRes.json();
         const expenseSum = expenseData.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
@@ -50,7 +50,6 @@ function DashboardPage() {
         // 4. Fetch Bills
         const billsRes = await authFetch('/bills');
         const billsData = await billsRes.json();
-        // Get 4 upcoming unpaid bills
         setBills(billsData.filter(bill => !bill.is_paid).slice(0, 4)); 
 
         // 5. Line Chart Data
@@ -84,14 +83,14 @@ function DashboardPage() {
     <div className="dashboard-page">
       <h2>Dashboard</h2>
       
-      {/* Stats */}
+      {/* Stats Grid */}
       <div className="stats-grid">
         <Link to="/networth" style={{ textDecoration: 'none' }}><StatCard title="Total Net Worth" value={formatCurrency(netWorth)} icon="💰" color="#FFD700" /></Link>
         <Link to="/income" style={{ textDecoration: 'none' }}><StatCard title="Total Income" value={formatCurrency(totalIncome)} icon="📈" color="#4CAF50" /></Link>
         <Link to="/expenses" style={{ textDecoration: 'none' }}><StatCard title="Total Expenses" value={formatCurrency(totalExpenses)} icon="📉" color="#F44336" /></Link>
       </div>
 
-      {/* Charts */}
+      {/* Charts Grid */}
       <div className="charts-grid">
         <div className="chart-card">
           <h3>Expense Breakdown</h3>
@@ -99,7 +98,16 @@ function DashboardPage() {
             {pieData.length > 0 ? (
                 <ResponsiveContainer>
                     <PieChart>
-                        <Pie data={pieData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label>
+                        <Pie 
+                          data={pieData} 
+                          cx="50%" 
+                          cy="50%" 
+                          outerRadius={80} 
+                          fill="#8884d8" 
+                          dataKey="value" 
+                          /* --- FIX: SHOW PERCENTAGE INSTEAD OF VALUE --- */
+                          label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                        >
                             {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                         </Pie>
                         <Tooltip formatter={(value) => formatCurrency(value)} />
@@ -118,15 +126,14 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* NEW SINGLE BILLS LIST SECTION */}
-      <div className="bills-section">
+      {/* FIXED BILLS SECTION: Wrapped in 'chart-card' for the Border/Shadow look */}
+      <div className="bills-section chart-card" style={{ marginTop: '20px', padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <h3>Upcoming Bills</h3>
             <Link to="/bills" style={{ color: '#1677ff', textDecoration: 'none' }}>View All</Link>
         </div>
         
-        {/* ONE container for all bills */}
-        <div className="upcoming-bill-card" style={{ padding: '0 20px', display: 'block' }}>
+        <div style={{ display: 'block' }}>
           {bills.length === 0 ? (
             <p style={{ padding: '20px', textAlign: 'center', color: '#888' }}>No upcoming bills found.</p>
           ) : (
