@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { authFetch } from '../utils/api';
-import './AdminPanelPage.css'; // We will create this CSS file next
+import './AdminPanelPage.css';
 
 function AdminPanelPage() {
   const [users, setUsers] = useState([]);
@@ -34,14 +34,18 @@ function AdminPanelPage() {
     return new Date(dateString).toLocaleString();
   };
 
+  // --- THE FILTER LOGIC ---
+  // Create a new list containing ONLY subscribed users
+  const subscribedUsers = users.filter(user => user.is_premium === true);
+
   if (loading) return <div className="admin-container">Loading users...</div>;
   if (error) return <div className="admin-container error-text">Error: {error}</div>;
 
   return (
     <div className="admin-container">
       <div className="admin-header">
-        <h2>Admin Panel</h2>
-        <p>{users.length} total users</p>
+        <h2>Admin Panel (Subscribed Users Only)</h2>
+        <p>{subscribedUsers.length} active subscribers</p>
       </div>
 
       <div className="user-table-container">
@@ -57,27 +61,31 @@ function AdminPanelPage() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>#{user.id}</td>
-                <td>
-                  <div className="client-info">
-                    <div className="client-avatar">
-                      {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
+            {subscribedUsers.length === 0 ? (
+              <tr><td colSpan="6" style={{textAlign: 'center'}}>No active subscribers found.</td></tr>
+            ) : (
+              subscribedUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>#{user.id}</td>
+                  <td>
+                    <div className="client-info">
+                      <div className="client-avatar">
+                        {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <span>{user.full_name || 'Unknown'}</span>
                     </div>
-                    <span>{user.full_name || 'Unknown'}</span>
-                  </div>
-                </td>
-                <td>{user.email}</td>
-                <td>{formatDate(user.created_at)}</td>
-                <td>{formatDate(user.last_login)}</td>
-                <td>
-                  <span className={`status-badge ${user.is_premium ? 'subscribed' : 'not-subscribed'}`}>
-                    {user.is_premium ? 'Subscribed' : 'Not Subscribed'}
-                  </span>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td>{user.email}</td>
+                  <td>{formatDate(user.created_at)}</td>
+                  <td>{formatDate(user.last_login)}</td>
+                  <td>
+                    <span className="status-badge subscribed">
+                      Subscribed
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
