@@ -1,15 +1,16 @@
 /* src/pages/RetirementPage.css */
 
-/* 1. Main Grid Layout (Matches new JS) */
+/* 1. Main Grid Layout */
 .retirement-page {
   display: grid;
-  grid-template-columns: 350px 1fr; /* Fixed left, Flexible right */
-  gap: 24px;
+  /* Left column fixed width, Right column fills the rest */
+  grid-template-columns: 350px 1fr; 
+  gap: 30px; /* Increased gap to stop overlapping */
   align-items: start;
   padding-bottom: 40px;
 }
 
-/* Column Containers */
+/* 2. Column Containers */
 .retirement-left-col {
   display: flex;
   flex-direction: column;
@@ -18,19 +19,26 @@
 
 .retirement-right-col {
   width: 100%;
-  min-height: 500px;
 }
 
-/* 2. Stats Card Styling */
-.stats-card-retirement {
-  position: relative;
-  text-align: center;
+/* 3. SHARED CARD STYLING (Applies to Left and Right boxes) */
+.retirement-card {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Adds depth */
 }
 
+/* Dark Mode Override for Cards */
+body.dark-mode .retirement-card {
+  background-color: #282844;
+  border-color: #4a4a6a;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* 4. Internal Stats Elements */
 .stats-header {
   display: flex;
   justify-content: space-between;
@@ -38,43 +46,30 @@
   margin-bottom: 20px;
 }
 
-.stats-header h3 {
-  margin: 0;
-}
+.stats-header h3 { margin: 0; }
 
-/* 3. New Chart Overlay (The text inside the donut) */
 .chart-overlay {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -20%); /* Centers text perfectly */
-  font-size: 2.5rem;
+  transform: translate(-50%, -20%);
+  font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
-  pointer-events: none; /* Let clicks pass through to chart */
+  pointer-events: none;
 }
 
-/* 4. Summary Details */
 .goal-summary {
   display: flex;
   justify-content: space-around;
-  margin-top: -20px;
+  margin-top: -10px;
   padding-top: 15px;
   border-top: 1px solid var(--border-color);
 }
 
-.goal-summary span {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
+.goal-summary span { font-size: 0.85rem; color: var(--text-secondary); }
+.goal-summary strong { display: block; font-size: 1.1rem; color: var(--text-primary); }
 
-.goal-summary strong {
-  display: block;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-}
-
-/* 5. Edit/Adjust Button */
 .edit-btn-small {
   background: transparent;
   border: 1px solid var(--border-color);
@@ -83,28 +78,15 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
-  transition: all 0.2s;
 }
 .edit-btn-small:hover {
   background-color: var(--hover-bg);
   color: var(--text-primary);
 }
 
-/* 6. Breakdown Card (Matches Stats Card Style) */
-.breakdown-card {
-  /* No specific styles needed if wrapped in data-container, 
-     but added just in case you use it as a standalone class */
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-}
-
-/* 7. Responsive: Stack on Mobile */
-@media (max-width: 1024px) {
+/* Mobile Responsive */
+@media (max-width: 1000px) {
   .retirement-page {
-    grid-template-columns: 1fr; /* Stack vertically */
-  }
-  
-  .retirement-left-col {
-    width: 100%;
+    grid-template-columns: 1fr; /* Stack vertically on tablets/phones */
   }
 }

@@ -41,7 +41,6 @@ function RetirementPage({ isPremium }) {
 
   useEffect(() => { fetchData(); }, []);
 
-  // Calculations
   const yearsLeft = plan.retire_age - plan.current_age;
   const totalSaved = plan.total_saved || 0;
   const goal = parseFloat(plan.retirement_goal);
@@ -55,7 +54,6 @@ function RetirementPage({ isPremium }) {
     }
   };
 
-  // Lock Logic
   const handleAddClick = () => {
       if(isPremium) { setContribToEdit(null); setContribModalOpen(true); } 
       else { alert("Upgrade to Premium to add savings!"); }
@@ -63,11 +61,9 @@ function RetirementPage({ isPremium }) {
 
   return (
     <div className="retirement-page">
-      {/* --- LEFT COLUMN: STATS & BREAKDOWN --- */}
+      {/* --- LEFT COLUMN --- */}
       <div className="retirement-left-col">
-        
-        {/* Stats Card */}
-        <div className="data-container stats-card-retirement">
+        <div className="retirement-card stats-card-retirement">
           <div className="stats-header">
             <h3>Stats</h3>
             <button className="edit-btn-small" onClick={() => setPlanModalOpen(true)}>Adjust Goal</button>
@@ -91,10 +87,7 @@ function RetirementPage({ isPremium }) {
                         <Tooltip formatter={(value) => formatCurrency(value)} />
                     </PieChart>
                 </ResponsiveContainer>
-                {/* Centered Text Overlay */}
-                <div className="chart-overlay">
-                    <strong>{progress.toFixed(0)}%</strong>
-                </div>
+                <div className="chart-overlay"><strong>{progress.toFixed(0)}%</strong></div>
             </div>
 
             <div className="goal-summary">
@@ -102,13 +95,12 @@ function RetirementPage({ isPremium }) {
                 <div><span>Saved:</span><br/><strong>{formatCurrency(totalSaved)}</strong></div>
             </div>
             <p style={{marginTop: '15px', fontSize: '0.9em', color: '#888'}}>
-                {yearsLeft} years, {0} months till retirement!
+                {yearsLeft} years till retirement!
             </p>
           </div>
         </div>
 
-        {/* Breakdown Card */}
-        <div className="data-container">
+        <div className="retirement-card" style={{padding: '20px'}}>
             <h3>Contribution Breakdown</h3>
             {breakdown.map((item, index) => (
                 <div key={index} style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #444'}}>
@@ -117,12 +109,11 @@ function RetirementPage({ isPremium }) {
                 </div>
             ))}
         </div>
-
       </div>
 
-      {/* --- RIGHT COLUMN: TABLE --- */}
+      {/* --- RIGHT COLUMN (Now uses retirement-card class) --- */}
       <div className="retirement-right-col">
-        <div className="data-container" style={{height: '100%'}}>
+        <div className="retirement-card" style={{height: '100%', minHeight: '500px'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
                 <h3>Retirement Savings</h3>
                 <button className="add-new-btn" onClick={handleAddClick}>+ New</button>
