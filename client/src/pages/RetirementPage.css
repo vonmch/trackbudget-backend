@@ -1,155 +1,110 @@
 /* src/pages/RetirementPage.css */
 
-/* 1. Main Grid Layout */
-.retirement-layout {
+/* 1. Main Grid Layout (Matches new JS) */
+.retirement-page {
   display: grid;
-  grid-template-columns: 340px 1fr; /* Fixed left column, flexible right */
+  grid-template-columns: 350px 1fr; /* Fixed left, Flexible right */
   gap: 24px;
-  align-items: start; /* Prevents columns from stretching unnaturally */
+  align-items: start;
+  padding-bottom: 40px;
 }
 
-.retirement-left-column {
+/* Column Containers */
+.retirement-left-col {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.retirement-right-column {
+.retirement-right-col {
   width: 100%;
+  min-height: 500px;
 }
 
-/* 2. UPDATED: Flattened Stats Card */
-.stats-container-retirement {
-  width: 100%;
-  background-color: var(--bg-secondary); /* Use variable for dark mode support */
-  padding: 24px; /* Increased padding slightly for breathing room */
+/* 2. Stats Card Styling */
+.stats-card-retirement {
+  position: relative;
+  text-align: center;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  
-  /* --- THE "FLATTEN" FIX --- */
-  box-shadow: none; /* Remove the shadow */
-  border: 1px solid var(--border-color); /* Add a subtle border instead */
-  /* ------------------------- */
-  
+  padding: 24px;
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.stats-header h3 {
+  margin: 0;
+}
+
+/* 3. New Chart Overlay (The text inside the donut) */
+.chart-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -20%); /* Centers text perfectly */
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  pointer-events: none; /* Let clicks pass through to chart */
+}
+
+/* 4. Summary Details */
+.goal-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-top: -20px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.goal-summary span {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.goal-summary strong {
+  display: block;
+  font-size: 1.1rem;
   color: var(--text-primary);
 }
 
-/* 3. Stats Internal Elements */
-.adjust-goal-btn {
-  float: right;
-  background: none;
-  border: 1px solid var(--border-color); /* Use variable */
+/* 5. Edit/Adjust Button */
+.edit-btn-small {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   padding: 4px 10px;
   border-radius: 6px;
   cursor: pointer;
-  color: var(--text-secondary);
   font-size: 0.85rem;
   transition: all 0.2s;
 }
-.adjust-goal-btn:hover {
+.edit-btn-small:hover {
   background-color: var(--hover-bg);
   color: var(--text-primary);
 }
 
-.monthly-deposit {
-  margin-top: 40px;
-  text-align: center;
-}
-.monthly-deposit span {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-.monthly-deposit strong {
-  display: block;
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-top: 4px;
-  color: var(--text-primary);
-}
-
-.retirement-summary {
-  display: flex;
-  justify-content: space-around;
-  margin-top: -20px;
-}
-.retirement-summary div {
-  text-align: center;
-}
-.retirement-summary span {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-.retirement-summary strong {
-  display: block;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.time-left {
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-top: 24px;
-  background-color: var(--hover-bg); /* Subtle background pill */
-  padding: 10px;
-  border-radius: 6px;
-}
-
-/* 4. Breakdown Card */
+/* 6. Breakdown Card (Matches Stats Card Style) */
 .breakdown-card {
-  width: 100%;
+  /* No specific styles needed if wrapped in data-container, 
+     but added just in case you use it as a standalone class */
   background-color: var(--bg-secondary);
-  padding: 20px;
-  border-radius: 8px;
-  /* Flatten this one too to match! */
-  box-shadow: none; 
   border: 1px solid var(--border-color);
-  color: var(--text-primary);
 }
 
-.breakdown-card h3 {
-  margin-top: 0;
-  font-size: 1.1rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 12px;
-  margin-bottom: 16px;
-}
-
-.breakdown-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.breakdown-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.95rem;
-}
-
-.breakdown-item span {
-  color: var(--text-secondary);
-}
-
-.breakdown-item strong {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.breakdown-item.empty {
-  color: var(--text-secondary);
-  justify-content: center;
-  font-size: 0.9rem;
-  padding: 10px;
-}
-
-/* Mobile Responsive */
+/* 7. Responsive: Stack on Mobile */
 @media (max-width: 1024px) {
-  .retirement-layout {
-    grid-template-columns: 1fr;
+  .retirement-page {
+    grid-template-columns: 1fr; /* Stack vertically */
+  }
+  
+  .retirement-left-col {
+    width: 100%;
   }
 }
