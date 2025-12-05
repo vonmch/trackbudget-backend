@@ -1,4 +1,4 @@
-// src/pages/RetirementPage.jsx
+// src/pages/RetirementPage.jsx (Fixed Modal Props)
 
 import React, { useState, useEffect } from 'react';
 import './RetirementPage.css';
@@ -111,7 +111,7 @@ function RetirementPage({ isPremium }) {
         </div>
       </div>
 
-      {/* --- RIGHT COLUMN (Now uses retirement-card class) --- */}
+      {/* --- RIGHT COLUMN --- */}
       <div className="retirement-right-col">
         <div className="retirement-card" style={{height: '100%', minHeight: '500px'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
@@ -142,15 +142,23 @@ function RetirementPage({ isPremium }) {
         </div>
       </div>
 
-      {/* Modals */}
+      {/* --- FIXED MODALS (Correct Prop Names) --- */}
       {isPlanModalOpen && (
         <Modal onClose={() => setPlanModalOpen(false)}>
-            <RetirementForm initialData={plan} onSave={() => { setPlanModalOpen(false); fetchData(); }} onCancel={() => setPlanModalOpen(false)} />
+            <RetirementForm 
+                plan={plan} 
+                onPlanSaved={() => { setPlanModalOpen(false); fetchData(); }} 
+                onCancel={() => setPlanModalOpen(false)} 
+            />
         </Modal>
       )}
       {isContribModalOpen && (
         <Modal onClose={() => setContribModalOpen(false)}>
-            <ContributionForm existingContrib={contribToEdit} onSave={() => { setContribModalOpen(false); fetchData(); }} onCancel={() => setContribModalOpen(false)} />
+            <ContributionForm 
+                existingContribution={contribToEdit} 
+                onSave={() => { setContribModalOpen(false); fetchData(); }} 
+                onCancel={() => setContribModalOpen(false)} 
+            />
         </Modal>
       )}
     </div>
