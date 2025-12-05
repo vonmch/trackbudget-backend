@@ -1,151 +1,162 @@
 // src/pages/ExpenseTrackerPage.jsx
 
-import React, { useState, useEffect, useMemo } from 'react';
-import './TrackerPage.css';
-import Modal from '../components/common/Modal';
-import ExpenseForm from '../components/forms/ExpenseForm'; 
-import DonutChart from '../components/common/DonutChart';
+import React, { useState, useEffect } from 'react';
+import { authFetch } from '../utils/api';
 import { formatCurrency } from '../utils/formatting';
-import { authFetch } from '../utils/api'; 
+import ExpenseForm from '../components/forms/ExpenseForm';
+import Modal from '../components/common/Modal';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import './TrackerPage.css';
 
 function ExpenseTrackerPage({ isPremium }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [expenses, setExpenses] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [expenseToEdit, setExpenseToEdit] = useState(null);
 
   const fetchExpenses = async () => {
-    try {
-      const response = await authFetch('/expenses');
-      if (response.ok) {
-        const data = await response.json();
-        setExpenses(Array.isArray(data) ? data : []);
-      } else {
-        setExpenses([]); 
-      }
-    } catch (error) {
-      console.error('Error fetching expenses:', error);
-      setExpenses([]);
-    }
+    const response = await authFetch('/expenses');
+    const data = await response.json();
+    setExpenses(data);
   };
 
   useEffect(() => {
     fetchExpenses();
   }, []);
 
-  const chartData = useMemo(() => {
-    const totals = { Wants: 0, Needs: 0 };
-    if (!expenses || expenses.length === 0) {
-      return [{ name: 'Wants', value: 0 }, { name: 'Needs', value: 0 }];
-    }
+  const handleSave = () => {
+    setIsModalOpen(false);
+    setExpenseToEdit(null);
+    fetchExpenses();
+  };
 
-    expenses.forEach(expense => {
-      // FIX: Parse string to number!
-      const amount = parseFloat(expense.amount);
-      if (expense.want_or_need === 'want') totals.Wants += amount;
-      else if (expense.want_or_need === 'need') totals.Needs += amount;
-    });
-    
-    return [
-      { name: 'Wants', value: totals.Wants },
-      { name: 'Needs', value: totals.Needs },
-    ];
-  }, [expenses]);
-
-  const totalWants = chartData[0]?.value || 0;
-  const totalNeeds = chartData[1]?.value || 0;
-  const totalExpenses = totalWants + totalNeeds;
-
-  const openCreateModal = () => { setExpenseToEdit(null); setIsModalOpen(true); };
-  const openEditModal = (expense) => { setExpenseToEdit(expense); setIsModalOpen(true); };
-  const closeModal = () => { setIsModalOpen(false); setExpenseToEdit(null); };
-  const handleSave = () => { closeModal(); fetchExpenses(); };
-
-  const handleDeleteExpense = async (expenseId) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this expense?')) {
-      try {
-        await authFetch(`/expenses/${expenseId}`, { method: 'DELETE' });
-        fetchExpenses();
-      } catch (error) { console.error('Error deleting expense:', error); }
+      await authFetch(`/expenses/${id}`, { method: 'DELETE' });
+      fetchExpenses();
     }
   };
 
-  const handleAddClick = () => {
-    if (isPremium) {
-      openCreateModal();
-    } else {
-      alert("Please upgrade to Premium to add new expenses!");
+  const openAddModal = () => { setExpenseToEdit(null); setIsModalOpen(true); };
+  const openEditModal = (expense) => { setExpenseToEdit(expense); setIsModalOpen(true); };
+  const closeModal = () => { setIsModalOpen(false); setExpenseToEdit(null); };
+
+  // --- Chart Data & Totals ---
+  const totalExpenses = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+  const totalWant = expenses.filter(e => e.want_or_need === 'want').reduce((sum, item) => sum + Number(item.amount), 0);
+  const totalNeed = expenses.filter(e => e.want_or_need === 'need').reduce((sum, item) => sum + Number(item.amount), 0);
+  
+  const wantPercent = totalExpenses > 0 ? Math.round((totalWant / totalExpenses) * 100) : 0;
+  const needPercent = totalExpenses > 0 ? Math.round((totalNeed / totalExpenses) * 100) : 0;
+
+  const chartData = [
+    { name: 'Needs', value: totalNeed, color: '#4CAF50' },
+    { name: 'Wants', value: totalWant, color: '#536dfe' }
+  ].filter(item => item.value > 0);
+
+  // Custom Tooltip for consistent positioning and formatting
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="custom-chart-tooltip">
+          <p className="tooltip-label" style={{color: data.color}}>
+            <span className="legend-dot" style={{backgroundColor: data.color}}></span>
+            {data.name}
+          </p>
+          <p className="tooltip-value">{formatCurrency(data.value)}</p>
+        </div>
+      );
     }
+    return null;
   };
 
   return (
-    <>
-      <div className="data-container" style={{ marginTop: '24px' }}>
-        <h3>Expenses</h3>
-        <button 
-          className="add-new-btn" 
-          onClick={handleAddClick}
-          style={{ opacity: isPremium ? 1 : 0.5, cursor: isPremium ? 'pointer' : 'not-allowed' }}
-        >
-          {isPremium ? '+ New' : '🔒 Locked'}
-        </button>
-        
-        <div className="data-table-scrollable">
-          <div className="data-table">
-            <table>
-              <thead>
-                <tr><th>Name</th><th>Amount</th><th>Date</th><th>Want/Need</th><th>Actions</th></tr>
-              </thead>
-              <tbody>
-                {!expenses || expenses.length === 0 ? (
-                  <tr><td colSpan="5">No data available in table</td></tr>
-                ) : (
-                  expenses.map((expense) => (
+    <div className="tracker-page">
+      <div className="tracker-header">
+        <h2>Expenses</h2>
+      </div>
+
+      {/* Top Section: Table & Chart */}
+      <div className="tracker-top-section">
+        {/* Left: Table */}
+        <div className="data-container table-container">
+          <div className="table-header">
+              <button className="add-new-btn" onClick={openAddModal}>+ New</button>
+          </div>
+          <div className="data-table-scrollable">
+            <div className="data-table">
+              <table>
+                <thead>
+                  <tr><th>Name</th><th>Amount</th><th>Date</th><th>Want/Need</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  {expenses.map(expense => (
                     <tr key={expense.id}>
                       <td>{expense.name}</td>
                       <td>{formatCurrency(expense.amount)}</td>
                       <td>{expense.date}</td>
-                      <td className="want-need-cell">{expense.want_or_need}</td>
+                      <td>{expense.want_or_need}</td>
                       <td>
                         <button className="edit-btn" onClick={() => openEditModal(expense)}>Edit</button>
-                        <button className="delete-btn" onClick={() => handleDeleteExpense(expense.id)}>Delete</button>
+                        <button className="delete-btn" onClick={() => handleDelete(expense.id)}>Delete</button>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className="stats-container" style={{ marginTop: '24px' }}>
-        <h3>Stats</h3>
-        <div className="chart-container">
-          <DonutChart data={chartData} />
-          <div className="chart-total">
-            Total<br/><span>{formatCurrency(totalExpenses)}</span>
+
+        {/* Right: Stats Chart */}
+        <div className="data-container stats-container">
+          <h3>Stats</h3>
+          <div className="chart-wrapper">
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                {/* Use Custom Tooltip for positioning and formatting */}
+                <Tooltip content={<CustomTooltip />} cursor={false} position={{ y: 0 }} />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Centered Text Overlay */}
+            <div className="chart-center-text">
+                <span>Total</span>
+                <strong>{formatCurrency(totalExpenses)}</strong>
+            </div>
           </div>
-        </div>
-        <div className="stats-legend">
-          <div>
-            <span className="legend-dot" style={{ backgroundColor: '#5465ff' }}></span>
-            Wants ({totalExpenses > 0 ? ((totalWants / totalExpenses) * 100).toFixed(0) : 0}%)
-            <span>{formatCurrency(totalWants)}</span>
-          </div>
-          <div>
-            <span className="legend-dot" style={{ backgroundColor: '#2ed47a' }}></span>
-            Needs ({totalExpenses > 0 ? ((totalNeeds / totalExpenses) * 100).toFixed(0) : 0}%)
-            <span>{formatCurrency(totalNeeds)}</span>
+          
+          {/* Legend below chart */}
+          <div className="chart-legend">
+            {chartData.map((entry, index) => (
+                 <div key={index} className="legend-item">
+                    <span className="legend-dot" style={{backgroundColor: entry.color}}></span>
+                    <span>{entry.name} ({entry.name === 'Wants' ? wantPercent : needPercent}%)</span>
+                    <strong style={{marginLeft: 'auto'}}>{formatCurrency(entry.value)}</strong>
+                 </div>
+            ))}
           </div>
         </div>
       </div>
 
       {isModalOpen && (
         <Modal onClose={closeModal}>
-          <ExpenseForm onCancel={closeModal} onSave={handleSave} existingExpense={expenseToEdit} />
+          <ExpenseForm onSave={handleSave} onCancel={closeModal} expenseToEdit={expenseToEdit} />
         </Modal>
       )}
-    </>
+    </div>
   );
 }
 

@@ -218,3 +218,37 @@ body.dark-mode .data-table th {
   background-color: #323250 !important;
   color: #a9a9c0 !important;
 }
+/* src/pages/TrackerPage.css */
+
+/* ... (keep all existing CSS) ... */
+
+/* --- New Custom Tooltip Styles --- */
+.custom-chart-tooltip {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+    /* Ensure it sits above other elements */
+    z-index: 1000; 
+    pointer-events: none; /* Prevents tooltip from blocking mouse events */
+}
+
+.tooltip-label {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tooltip-value {
+    margin: 5px 0 0 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+/* --------------------------------- */
