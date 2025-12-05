@@ -252,3 +252,65 @@ body.dark-mode .data-table th {
     color: var(--text-primary);
 }
 /* --------------------------------- */
+/* src/pages/TrackerPage.css */
+
+/* ... (Keep existing styles) ... */
+
+/* --- NEW STATS LIST STYLES --- */
+
+.stats-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.total-row {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.total-row strong {
+    color: var(--text-primary);
+}
+
+.legend-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+}
+
+/* The Colored Block */
+.legend-block {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px; /* Slight rounded corners for modern look */
+}
+
+/* Badges for the Table (Bonus polish) */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+.badge-want {
+    background-color: rgba(83, 109, 254, 0.1);
+    color: #536dfe;
+}
+.badge-need {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+}

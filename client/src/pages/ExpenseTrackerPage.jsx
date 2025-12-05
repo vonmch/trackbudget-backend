@@ -19,16 +19,9 @@ function ExpenseTrackerPage({ isPremium }) {
     setExpenses(data);
   };
 
-  useEffect(() => {
-    fetchExpenses();
-  }, []);
+  useEffect(() => { fetchExpenses(); }, []);
 
-  const handleSave = () => {
-    setIsModalOpen(false);
-    setExpenseToEdit(null);
-    fetchExpenses();
-  };
-
+  const handleSave = () => { setIsModalOpen(false); setExpenseToEdit(null); fetchExpenses(); };
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this expense?')) {
       await authFetch(`/expenses/${id}`, { method: 'DELETE' });
@@ -40,7 +33,7 @@ function ExpenseTrackerPage({ isPremium }) {
   const openEditModal = (expense) => { setExpenseToEdit(expense); setIsModalOpen(true); };
   const closeModal = () => { setIsModalOpen(false); setExpenseToEdit(null); };
 
-  // --- Chart Data & Totals ---
+  // --- Calculations ---
   const totalExpenses = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
   const totalWant = expenses.filter(e => e.want_or_need === 'want').reduce((sum, item) => sum + Number(item.amount), 0);
   const totalNeed = expenses.filter(e => e.want_or_need === 'need').reduce((sum, item) => sum + Number(item.amount), 0);
@@ -49,18 +42,18 @@ function ExpenseTrackerPage({ isPremium }) {
   const needPercent = totalExpenses > 0 ? Math.round((totalNeed / totalExpenses) * 100) : 0;
 
   const chartData = [
-    { name: 'Needs', value: totalNeed, color: '#4CAF50' },
-    { name: 'Wants', value: totalWant, color: '#536dfe' }
-  ].filter(item => item.value > 0);
+    { name: 'Needs', value: totalNeed, color: '#4CAF50' }, // Green
+    { name: 'Wants', value: totalWant, color: '#536dfe' }  // Blue
+  ]; // Note: Removed .filter() so we show 0 values in list if empty
 
-  // Custom Tooltip for consistent positioning and formatting
+  // Custom Tooltip
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
         <div className="custom-chart-tooltip">
           <p className="tooltip-label" style={{color: data.color}}>
-            <span className="legend-dot" style={{backgroundColor: data.color}}></span>
+            <span className="legend-block" style={{backgroundColor: data.color}}></span>
             {data.name}
           </p>
           <p className="tooltip-value">{formatCurrency(data.value)}</p>
@@ -76,7 +69,6 @@ function ExpenseTrackerPage({ isPremium }) {
         <h2>Expenses</h2>
       </div>
 
-      {/* Top Section: Table & Chart */}
       <div className="tracker-top-section">
         {/* Left: Table */}
         <div className="data-container table-container">
@@ -87,7 +79,7 @@ function ExpenseTrackerPage({ isPremium }) {
             <div className="data-table">
               <table>
                 <thead>
-                  <tr><th>Name</th><th>Amount</th><th>Date</th><th>Want/Need</th><th>Actions</th></tr>
+                  <tr><th>Name</th><th>Amount</th><th>Date</th><th>Type</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   {expenses.map(expense => (
@@ -95,7 +87,11 @@ function ExpenseTrackerPage({ isPremium }) {
                       <td>{expense.name}</td>
                       <td>{formatCurrency(expense.amount)}</td>
                       <td>{expense.date}</td>
-                      <td>{expense.want_or_need}</td>
+                      <td>
+                        <span className={`badge ${expense.want_or_need === 'want' ? 'badge-want' : 'badge-need'}`}>
+                            {expense.want_or_need}
+                        </span>
+                      </td>
                       <td>
                         <button className="edit-btn" onClick={() => openEditModal(expense)}>Edit</button>
                         <button className="delete-btn" onClick={() => handleDelete(expense.id)}>Delete</button>
@@ -111,11 +107,13 @@ function ExpenseTrackerPage({ isPremium }) {
         {/* Right: Stats Chart */}
         <div className="data-container stats-container">
           <h3>Stats</h3>
-          <div className="chart-wrapper">
-            <ResponsiveContainer width="100%" height={220}>
+          
+          {/* 1. The Graph */}
+          <div className="chart-wrapper" style={{ height: '200px' }}>
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={chartData}
+                  data={chartData.filter(d => d.value > 0)} // Only graph data that exists
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -127,27 +125,35 @@ function ExpenseTrackerPage({ isPremium }) {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                {/* Use Custom Tooltip for positioning and formatting */}
-                <Tooltip content={<CustomTooltip />} cursor={false} position={{ y: 0 }} />
+                <Tooltip content={<CustomTooltip />} cursor={false} />
               </PieChart>
             </ResponsiveContainer>
-            {/* Centered Text Overlay */}
-            <div className="chart-center-text">
+          </div>
+          
+          {/* 2. The New Clean List (Below Graph) */}
+          <div className="stats-list">
+            
+            {/* Total Row */}
+            <div className="stat-row total-row">
                 <span>Total</span>
                 <strong>{formatCurrency(totalExpenses)}</strong>
             </div>
-          </div>
-          
-          {/* Legend below chart */}
-          <div className="chart-legend">
+
+            {/* Legend Rows */}
             {chartData.map((entry, index) => (
-                 <div key={index} className="legend-item">
-                    <span className="legend-dot" style={{backgroundColor: entry.color}}></span>
-                    <span>{entry.name} ({entry.name === 'Wants' ? wantPercent : needPercent}%)</span>
-                    <strong style={{marginLeft: 'auto'}}>{formatCurrency(entry.value)}</strong>
+                 <div key={index} className="stat-row">
+                    <div className="legend-label">
+                        {/* The Colored Block */}
+                        <span className="legend-block" style={{backgroundColor: entry.color}}></span>
+                        {/* Name + Percent */}
+                        <span>{entry.name} ({entry.name === 'Wants' ? wantPercent : needPercent}%)</span>
+                    </div>
+                    {/* Value */}
+                    <strong>{formatCurrency(entry.value)}</strong>
                  </div>
             ))}
           </div>
+
         </div>
       </div>
 
