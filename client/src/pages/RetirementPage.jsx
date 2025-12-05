@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import './RetirementPage.css';
 import './TrackerPage.css';
 import { authFetch } from '../utils/api';
-import { formatCurrency } from '../utils/formatting';
+import { formatCurrency, formatDate } from '../utils/formatting';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Modal from '../components/common/Modal';
 import RetirementForm from '../components/forms/RetirementForm';
@@ -129,7 +129,7 @@ function RetirementPage({ isPremium }) {
                             <tr key={c.id}>
                                 <td>{formatCurrency(c.amount)}</td>
                                 <td>{c.type}</td>
-                                <td>{c.date}</td>
+                                <td>{formatDate(c.date)}</td>
                                 <td>
                                     <button className="edit-btn" onClick={() => { setContribToEdit(c); setContribModalOpen(true); }}>Edit</button>
                                     <button className="delete-btn" onClick={() => handleDelete(c.id)}>Delete</button>

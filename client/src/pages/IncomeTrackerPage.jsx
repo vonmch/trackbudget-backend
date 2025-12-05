@@ -5,7 +5,7 @@ import './TrackerPage.css';
 import Modal from '../components/common/Modal';
 import IncomeForm from '../components/forms/IncomeForm';
 import LineGraph from '../components/common/LineGraph';
-import { formatCurrency } from '../utils/formatting'; // Safe formatter
+import { formatCurrency, formatDate } from '../utils/formatting'; // Safe formatter
 import { authFetch } from '../utils/api'; // Safe API
 
 const incomeGraphLines = [
@@ -109,7 +109,7 @@ function IncomeTrackerPage({ isPremium }) {
                       <td>{item.name}</td>
                       {/* Safe formatting here: */}
                       <td>{formatCurrency(item.amount)}</td>
-                      <td>{item.date}</td>
+                      <td>{formatDate(item.date)}</td>
                       <td>
                         <button className="edit-btn" onClick={() => openEditModal(item)}>Edit</button>
                         <button className="delete-btn" onClick={() => handleDeleteIncome(item.id)}>Delete</button>

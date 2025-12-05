@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { authFetch } from '../utils/api';
-import { formatCurrency } from '../utils/formatting';
+import { formatCurrency, formatDate } from '../utils/formatting';
 import ExpenseForm from '../components/forms/ExpenseForm';
 import Modal from '../components/common/Modal';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -86,7 +86,7 @@ function ExpenseTrackerPage({ isPremium }) {
                     <tr key={expense.id}>
                       <td>{expense.name}</td>
                       <td>{formatCurrency(expense.amount)}</td>
-                      <td>{expense.date}</td>
+                      <td>{formatDate(expense.date)}</td>
                       <td>
                         <span className={`badge ${expense.want_or_need === 'want' ? 'badge-want' : 'badge-need'}`}>
                             {expense.want_or_need}

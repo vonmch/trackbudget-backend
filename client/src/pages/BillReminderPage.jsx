@@ -6,7 +6,7 @@ import './BillReminderPage.css';
 import Modal from '../components/common/Modal';
 import BillForm from '../components/forms/BillForm';
 import SimpleBarChart from '../components/common/SimpleBarChart';
-import { formatCurrency } from '../utils/formatting';
+import { formatCurrency, formatDate } from '../utils/formatting';
 import { authFetch } from '../utils/api'; 
 
 function BillReminderPage({ isPremium }) {
@@ -111,7 +111,7 @@ function BillReminderPage({ isPremium }) {
                     <tr key={bill.id}>
                       <td>{bill.name}</td>
                       <td>{formatCurrency(bill.amount)}</td>
-                      <td>{bill.due_date.split('T')[0].split(' ')[0]}</td>
+                      <td>{formatDate(bill.due_date)}</td>
                       <td>{bill.type}</td>
                       <td>
                         <input type="checkbox" checked={bill.is_paid} onChange={() => handleTogglePaid(bill)} style={{transform: 'scale(1.3)', cursor: 'pointer'}} />
