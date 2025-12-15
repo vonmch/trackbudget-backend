@@ -1,7 +1,7 @@
 // src/pages/LandingPage.jsx
 
 import React from 'react';
-import <link> from 'react-router-dom';
+import { Link } from 'react-router-dom'; // <--- FIX: Correct import { Link }
 import './LandingPage.css';
 
 function LandingPage() {
@@ -25,8 +25,9 @@ function LandingPage() {
           <h1>TrackBudgetBuild</h1>
         </div>
         <nav className="landing-nav">
-          <link to="/login" className="landing-link login-link">Log In</link>
-          <link to="/signup" className="landing-link signup-btn">Sign Up Free</link>
+          {/* <--- FIX: Uppercase <Link> */}
+          <Link to="/login" className="landing-link login-link">Log In</Link>
+          <Link to="/signup" className="landing-link signup-btn">Sign Up Free</Link>
         </nav>
       </header>
 
@@ -39,8 +40,9 @@ function LandingPage() {
             Take control of your financial future with the ultimate all-in-one wealth management dashboard.
           </p>
           <div className="hero-ctas">
-            <link to="/signup" className="hero-btn primary-btn">Start Building Wealth</link>
-            <link to="/login" className="hero-btn secondary-btn">Existing User?</link>
+            {/* <--- FIX: Uppercase <Link> */}
+            <Link to="/signup" className="hero-btn primary-btn">Start Building Wealth</Link>
+            <Link to="/login" className="hero-btn secondary-btn">Existing User?</Link>
           </div>
         </div>
       </section>
@@ -65,7 +67,8 @@ function LandingPage() {
       {/* --- 4. Bottom CTA & Footer --- */}
       <section className="cta-banner">
         <h2>Stop Making Excuses. Start Tracking Today.</h2>
-        <link to="/signup" className="landing-link signup-btn large-btn">Create Free Account</link>
+        {/* <--- FIX: Uppercase <Link> */}
+        <Link to="/signup" className="landing-link signup-btn large-btn">Create Free Account</Link>
       </section>
 
       <footer className="landing-footer">
