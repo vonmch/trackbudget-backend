@@ -125,3 +125,23 @@ text.recharts-text.recharts-cartesian-axis-tick-value {
 body.dark-mode text.recharts-text.recharts-cartesian-axis-tick-value {
     fill: #a9a9c0 !important;
 }
+/* src/pages/DashboardPage.css */
+
+/* --- NEW DASHBOARD HEADER STYLE --- */
+.dashboard-header {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+}
+/* ---------------------------------- */
+
+/* ... rest of your CSS ... */

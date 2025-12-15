@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import StatCard from '../components/common/StatCard';
 import SimpleLineChart from '../components/common/SimpleLineChart';
 import { authFetch } from '../utils/api'; 
-import { formatCurrency } from '../utils/formatting';
+import { formatCurrency, formatDate } from '../utils/formatting'; // Import formatDate
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 function DashboardPage() {
@@ -81,7 +81,12 @@ function DashboardPage() {
 
   return (
     <div className="dashboard-page">
-      <h2>Dashboard</h2>
+      
+      {/* --- NEW HEADER BOX (Matches other pages) --- */}
+      <div className="dashboard-header">
+        <h2>Dashboard</h2>
+      </div>
+      {/* ------------------------------------------- */}
       
       {/* Stats Grid */}
       <div className="stats-grid">
@@ -105,7 +110,6 @@ function DashboardPage() {
                           outerRadius={80} 
                           fill="#8884d8" 
                           dataKey="value" 
-                          /* --- FIX: SHOW PERCENTAGE INSTEAD OF VALUE --- */
                           label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
                         >
                             {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
@@ -143,7 +147,7 @@ function DashboardPage() {
                         <tr key={bill.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                             <td style={{ padding: '15px 0' }}>
                                 <strong>{bill.name}</strong><br/>
-                                <span style={{ fontSize: '0.85em', opacity: 0.7 }}>Due {bill.due_date}</span>
+                                <span style={{ fontSize: '0.85em', opacity: 0.7 }}>Due {formatDate(bill.due_date)}</span>
                             </td>
                             <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
                                 {formatCurrency(bill.amount)}
