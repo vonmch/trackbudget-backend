@@ -54,25 +54,40 @@
 
 /* ... (Keep your existing CSS above this) ... */
 
-/* --- NEW: Border Styling for Dashboard Cards --- */
 
-/* 1. Apply the border to all card types */
-.stat-card, 
-.chart-card, 
-.upcoming-bill-card,
-.bills-section.chart-card { /* Specifically target the bill section container */
-    border: 1px solid var(--border-color) !important; /* Force the border */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Consistent shadow */
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+/* --- FIXED: Robust Border and Card Styling for Dashboard --- */
+
+/* Target the stat cards and the main chart/bill cards */
+.stat-card,
+.chart-card {
+    /* 1. Set a background color. This is crucial.
+       Without it, the card is transparent, which can make the border look
+       like it's "behind" the content if the content has its own background. */
+    background-color: var(--bg-secondary) !important;
+
+    /* 2. Force the border to be present at all times. */
+    border: 1px solid var(--border-color) !important;
+
+    /* 3. Ensure the border and padding are included in the element's size. */
+    box-sizing: border-box !important;
+
+    /* 4. Add uniform padding for a clean look.
+       This forces space between the border and the graph/text inside. */
+    padding: 24px !important;
+
+    /* 5. Rounded corners and shadow for a professional card look. */
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+
+    /* 6. Smooth transitions for hover effects. */
+    transition: all 0.3s ease !important;
 }
 
-/* 2. Optional Polish: Subtle Hover Effect */
-/* This makes the UI feel more interactive and premium */
-.stat-card:hover, 
-.chart-card:hover, 
-.upcoming-bill-card:hover,
-.bills-section.chart-card:hover {
-    transform: translateY(-2px); /* Slight lift */
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Deeper shadow */
-    border-color: var(--text-secondary); /* Slightly more visible border on hover */
+/* Hover Effect: Make the cards "pop" when interacted with */
+.stat-card:hover,
+.chart-card:hover {
+    transform: translateY(-5px) !important; /* Lift up */
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important; /* Stronger shadow */
+    /* Optional: make the border slightly darker on hover for emphasis */
+    border-color: var(--text-secondary) !important;
 }
