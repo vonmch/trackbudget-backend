@@ -91,3 +91,37 @@
     /* Optional: make the border slightly darker on hover for emphasis */
     border-color: var(--text-secondary) !important;
 }
+/* src/pages/DashboardPage.css */
+
+/* ... (Keep all your existing code) ... */
+
+
+/* --- FIX: Make Stat Numbers Visible in Light Mode --- */
+
+/* 1. Target the text inside the Stat Cards */
+.stat-card h1,
+.stat-card h2,
+.stat-card h3,
+.stat-card strong,
+.stat-card b,
+.stat-card .stat-value { /* Catch-all for whatever tag holds the number */
+    color: var(--text-primary) !important;
+}
+
+/* 2. Target the Title/Label to ensure it's not too light */
+.stat-card span,
+.stat-card p,
+.stat-card .stat-label {
+    color: var(--text-secondary) !important;
+}
+
+/* 3. Fix the Graph Text Colors (Axis Labels) */
+/* In Light Mode, make them darker so they are easier to read */
+text.recharts-text.recharts-cartesian-axis-tick-value {
+    fill: var(--text-secondary) !important;
+}
+
+/* In Dark Mode, force them white (handled by body.dark-mode in App.css, but this reinforces it) */
+body.dark-mode text.recharts-text.recharts-cartesian-axis-tick-value {
+    fill: #a9a9c0 !important;
+}
