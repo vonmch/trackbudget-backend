@@ -1,0 +1,233 @@
+/* src/pages/LandingPage.css */
+
+/* Global Landing Page Reset */
+.landing-page {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- 1. Header & Nav --- */
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 5%;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.landing-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-logo-img {
+  height: 40px;
+  width: auto;
+}
+
+.landing-logo-container h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(90deg, var(--text-primary), var(--brand-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.landing-nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.landing-link {
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.login-link {
+  color: var(--text-secondary);
+}
+.login-link:hover {
+  color: var(--text-primary);
+}
+
+.signup-btn {
+  background-color: var(--brand-color);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(22, 119, 255, 0.3);
+}
+.signup-btn:hover {
+  background-color: #096dd9;
+  transform: translateY(-2px);
+}
+
+/* --- 2. Hero Section --- */
+.hero-section {
+  /* Create a cool dark gradient hook that works in both themes */
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+  padding: 100px 20px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-content {
+  max-width: 800px;
+}
+
+.hero-motto {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #ffffff, #93c5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-question {
+  font-size: 2rem;
+  color: var(--brand-color);
+  margin-bottom: 24px;
+}
+
+.hero-subtext {
+  font-size: 1.2rem;
+  color: #cbd5e1; /* Light grey for contrast on dark hero background */
+  margin-bottom: 40px;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.hero-btn {
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.primary-btn {
+  background-color: var(--brand-color);
+  color: white;
+  box-shadow: 0 4px 15px rgba(22, 119, 255, 0.4);
+}
+.primary-btn:hover {
+  transform: translateY(-3px);
+  background-color: #096dd9;
+}
+
+.secondary-btn {
+  background-color: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+.secondary-btn:hover {
+  border-color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- 3. Features Section --- */
+.features-section {
+  padding: 80px 5%;
+  background-color: var(--bg-primary);
+  text-align: center;
+}
+
+.features-header {
+  margin-bottom: 60px;
+}
+.features-header h2 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+.features-header p {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background-color: var(--bg-secondary);
+  padding: 40px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-color: var(--brand-color);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.feature-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* --- 4. Bottom Banner & Footer --- */
+.cta-banner {
+  padding: 80px 20px;
+  background-color: var(--bg-secondary);
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+}
+.cta-banner h2 {
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+.large-btn {
+  padding: 15px 40px;
+  font-size: 1.2rem;
+}
+
+.landing-footer {
+  padding: 30px;
+  text-align: center;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-motto { font-size: 2.5rem; }
+  .hero-question { font-size: 1.5rem; }
+  .hero-ctas { flex-direction: column; }
+  .landing-header { padding: 15px; }
+  .landing-logo-container h1 { font-size: 1.2rem; }
+}
