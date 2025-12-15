@@ -1,6 +1,6 @@
-// src/App.jsx (Final Version with Admin Route)
+// src/App.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom'; 
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { authFetch } from './utils/api';
@@ -11,6 +11,7 @@ import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
 
 // Pages
+import LandingPage from './pages/LandingPage'; // <--- NEW IMPORT
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
@@ -23,7 +24,7 @@ import NetWorthPage from './pages/NetWorthPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import SuccessPage from './pages/SuccessPage';
-import AdminPanelPage from './pages/AdminPanelPage'; // <--- Admin Page Import
+import AdminPanelPage from './pages/AdminPanelPage';
 
 const ProtectedLayout = () => {
   const { user, loading } = useAuth();
@@ -35,7 +36,6 @@ const ProtectedLayout = () => {
         try {
           const response = await authFetch('/profile');
           const data = await response.json();
-          // Force boolean (true/false)
           setIsPremium(!!data.is_premium); 
         } catch (error) {
           console.error("Failed to check subscription:", error);
@@ -46,7 +46,7 @@ const ProtectedLayout = () => {
   }, [user]);
 
   if (loading) return null;
-  if (!user) return <Navigate to="/signup" />;
+  if (!user) return <Navigate to="/login" />; // Redirect to Login if not authenticated
 
   return (
     <div className="app-layout">
@@ -55,7 +55,7 @@ const ProtectedLayout = () => {
         <Navbar />
         <div className="main-content">
           <Routes>
-            {/* Redirect root "/" to "/dashboard" immediately */}
+            {/* Default Protected Page is now Dashboard */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             
             <Route path="/dashboard" element={<DashboardPage />} /> 
@@ -69,10 +69,8 @@ const ProtectedLayout = () => {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/success" element={<SuccessPage />} />
             
-            {/* --- NEW ADMIN ROUTE --- */}
+            {/* Admin Route */}
             <Route path="/admin" element={<AdminPanelPage />} />
-            {/* ----------------------- */}
-
           </Routes>
         </div>
       </div>
@@ -91,11 +89,12 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Public Routes */}
+        {/* --- PUBLIC ROUTES (No Sidebar/Navbar) --- */}
+        <Route path="/" element={<LandingPage />} /> {/* The Front Door */}
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
         
-        {/* Protected Routes */}
+        {/* --- PROTECTED ROUTES (Has Sidebar/Navbar) --- */}
         <Route path="/*" element={<ProtectedLayout />} />
       </Routes>
     </AuthProvider>
