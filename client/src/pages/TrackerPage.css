@@ -1,25 +1,38 @@
 /* src/pages/TrackerPage.css */
 
-/* 1. Container Styles */
-.stats-container {
+/* 1. Header Styles (NEW: Card Style for the Title) */
+.tracker-header {
   background-color: var(--bg-secondary);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  color: var(--text-primary);
-  transition: background-color 0.3s, color 0.3s;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
+.tracker-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+}
+
+/* 2. Container Styles */
+.stats-container,
 .data-container {
   background-color: var(--bg-secondary);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   color: var(--text-primary);
+  border: 1px solid var(--border-color); /* Added border consistency */
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* 2. Button Styles */
+/* 3. Button Styles */
 .add-new-btn {
   background-color: #1677ff;
   color: #fff;
@@ -35,14 +48,13 @@
   background-color: #096dd9;
 }
 
-/* 3. Scrollable Table Wrapper */
+/* 4. Table Layout */
 .data-table-scrollable {
   width: 100%;
   max-height: 400px;
   overflow-y: auto;
 }
 
-/* 4. Table Styles */
 .data-table {
   margin-top: 24px;
   width: 100%;
@@ -53,11 +65,10 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  /* CRITICAL: Ensure no background color leaks in */
   background-color: transparent; 
 }
 
-/* 5. Header Styles */
+/* 5. Table Headers & Cells */
 .data-table-scrollable thead th {
   position: sticky;
   top: 0;
@@ -67,28 +78,23 @@
 
 .data-table th {
   background-color: var(--table-header-bg);
-  font-weight: 600; /* Made slightly bolder */
+  font-weight: 600;
   color: var(--text-secondary);
   padding: 12px 16px;
-  /* Use a variable for border, but we will override for dark mode below */
   border-bottom: 1px solid var(--border-color);
 }
 
-/* 6. Cell Styles */
 .data-table td {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
 }
 
-/* 7. Row Styles - THE "INVISIBLE TEXT" FIX */
 .data-table tbody tr {
-  /* Force background to be transparent so the dark card shows through */
   background-color: transparent !important; 
   transition: background-color 0.2s;
 }
 
-/* Only change background on hover */
 .data-table tbody tr:hover {
   background-color: var(--hover-bg) !important;
 }
@@ -99,100 +105,110 @@
   padding: 40px;
 }
 
-.want-need-cell {
-  text-transform: capitalize;
-}
-
-/* --- DARK MODE OVERRIDES --- */
-/* This section specifically targets Dark Mode to fix the white borders */
-body.dark-mode .data-table th,
-body.dark-mode .data-table td {
-  /* Make the border a dark, subtle grey instead of white */
-  border-bottom-color: #3a3a5a; 
-}
-
-body.dark-mode .data-table th {
-  /* Make the header slightly darker than the row */
-  background-color: #25253e; 
-}
-
-/* --- Chart Styles --- */
-.chart-container {
+/* 6. Stats & Chart Layout */
+.chart-wrapper {
   position: relative;
+  width: 100%;
 }
-.chart-total {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.3;
-}
-.chart-total span {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-.stats-legend {
+
+/* New Stats List (The clean list below the graph) */
+.stats-list {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
 }
-.stats-legend div {
+
+.stat-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  font-size: 0.9rem;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.total-row {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 15px;
+  margin-bottom: 5px;
+  font-size: 1.1rem;
+}
+
+.total-row strong {
   color: var(--text-primary);
 }
-.stats-legend div span:first-child {
+
+.legend-label {
   display: flex;
   align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+}
+
+.legend-block {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+/* 7. Custom Tooltip Styles */
+.custom-chart-tooltip {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  text-align: center;
+  z-index: 1000; 
+  pointer-events: none;
+}
+
+.tooltip-label {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
 }
-.stats-legend div span:last-child {
+
+.tooltip-value {
+  margin: 5px 0 0 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+/* 8. Badges (Want/Need pills) */
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
   font-weight: 600;
+  text-transform: capitalize;
 }
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.badge-want {
+  background-color: rgba(83, 109, 254, 0.1);
+  color: #536dfe;
 }
-.custom-tooltip {
-  background-color: rgba(0, 0, 0, 0.9); /* Darker background for tooltip */
-  padding: 10px;
-  border-radius: 6px;
-  color: white;
-  border: 1px solid #4a4a6a; /* Subtle border for tooltip */
+.badge-need {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
 }
-.custom-tooltip .label {
-  font-weight: 600;
-  margin: 0;
-}
-.custom-tooltip .intro {
-  margin: 0;
-  padding-top: 5px;
-}
-/* src/pages/TrackerPage.css */
 
-/* ... (keep all your existing code above this) ... */
+/* --- DARK MODE OVERRIDES --- */
 
-
-/* --- FORCE DARK MODE FIXES --- */
-/* Copy and paste this to the bottom of the file */
-
-/* 1. Force the card containers to be Dark Grey */
+/* Force card containers to be Dark Grey */
 body.dark-mode .data-container,
-body.dark-mode .stats-container {
+body.dark-mode .stats-container,
+body.dark-mode .tracker-header {
   background-color: #282844 !important;
   color: #f0f0f0 !important;
-  border: 1px solid #4a4a6a; /* Adds a nice subtle border */
+  border: 1px solid #4a4a6a;
 }
 
-/* 2. Force the table and rows to be transparent so the dark card shows through */
+/* Force table transparency */
 body.dark-mode .data-table,
 body.dark-mode .data-table table,
 body.dark-mode .data-table tbody,
@@ -201,116 +217,20 @@ body.dark-mode .data-table tr {
   color: #f0f0f0 !important;
 }
 
-/* 3. Fix the hover state to be a lighter grey/blue, not white */
+/* Fix hover state */
 body.dark-mode .data-table tbody tr:hover {
   background-color: #3a3a5a !important;
 }
 
-/* 4. Fix the borders between rows to be subtle grey */
+/* Fix borders */
 body.dark-mode .data-table td,
 body.dark-mode .data-table th {
   border-bottom-color: #4a4a6a !important;
   color: #f0f0f0 !important;
 }
 
-/* 5. Ensure the header background is dark */
+/* Fix header background */
 body.dark-mode .data-table th {
   background-color: #323250 !important;
   color: #a9a9c0 !important;
-}
-/* src/pages/TrackerPage.css */
-
-/* ... (keep all existing CSS) ... */
-
-/* --- New Custom Tooltip Styles --- */
-.custom-chart-tooltip {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    padding: 10px 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    text-align: center;
-    /* Ensure it sits above other elements */
-    z-index: 1000; 
-    pointer-events: none; /* Prevents tooltip from blocking mouse events */
-}
-
-.tooltip-label {
-    margin: 0;
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.tooltip-value {
-    margin: 5px 0 0 0;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--text-primary);
-}
-/* --------------------------------- */
-/* src/pages/TrackerPage.css */
-
-/* ... (Keep existing styles) ... */
-
-/* --- NEW STATS LIST STYLES --- */
-
-.stats-list {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.95rem;
-}
-
-.total-row {
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 15px;
-    margin-bottom: 5px;
-    font-size: 1.1rem;
-}
-
-.total-row strong {
-    color: var(--text-primary);
-}
-
-.legend-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text-secondary);
-}
-
-/* The Colored Block */
-.legend-block {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border-radius: 4px; /* Slight rounded corners for modern look */
-}
-
-/* Badges for the Table (Bonus polish) */
-.badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: capitalize;
-}
-.badge-want {
-    background-color: rgba(83, 109, 254, 0.1);
-    color: #536dfe;
-}
-.badge-need {
-    background-color: rgba(76, 175, 80, 0.1);
-    color: #4CAF50;
 }
