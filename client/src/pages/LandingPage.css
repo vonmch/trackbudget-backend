@@ -1,9 +1,13 @@
 /* src/pages/LandingPage.css */
 
+/* --- FORCE DARK THEME FOR LANDING PAGE --- */
+/* We use hardcoded hex codes instead of variables to ensure 
+   this page always looks dark, regardless of user preference. */
+
 /* Global Landing Page Reset */
 .landing-page {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: #0f172a; /* Hardcoded Dark Blue */
+  color: #ffffff;            /* Hardcoded White Text */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -15,8 +19,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 5%;
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  background-color: #0f172a; /* Match main bg for seamless look */
+  border-bottom: 1px solid #1e293b; /* Dark subtle border */
 }
 
 .landing-logo-container {
@@ -34,7 +38,7 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(90deg, var(--text-primary), var(--brand-color));
+  background: linear-gradient(90deg, #ffffff, var(--brand-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -52,15 +56,15 @@
 }
 
 .login-link {
-  color: var(--text-secondary);
+  color: #cbd5e1; /* Light grey */
 }
 .login-link:hover {
-  color: var(--text-primary);
+  color: #ffffff; /* White on hover */
 }
 
 .signup-btn {
-  background-color: var(--brand-color);
-  color: white;
+  background-color: var(--brand-color); /* Keep brand blue */
+  color: white !important; /* Force white text */
   padding: 10px 24px;
   border-radius: 8px;
   box-shadow: 0 4px 14px rgba(22, 119, 255, 0.3);
@@ -72,7 +76,7 @@
 
 /* --- 2. Hero Section --- */
 .hero-section {
-  /* Create a cool dark gradient hook that works in both themes */
+  /* This was already good, keep it. */
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: white;
   padding: 100px 20px;
@@ -145,19 +149,20 @@
 /* --- 3. Features Section --- */
 .features-section {
   padding: 80px 5%;
-  background-color: var(--bg-primary);
+  background-color: #0f172a; /* Hardcoded dark */
   text-align: center;
 }
 
 .features-header {
   margin-bottom: 60px;
+  color: white;
 }
 .features-header h2 {
   font-size: 2.5rem;
   margin-bottom: 10px;
 }
 .features-header p {
-  color: var(--text-secondary);
+  color: #cbd5e1; /* Light grey */
   font-size: 1.2rem;
 }
 
@@ -170,17 +175,18 @@
 }
 
 .feature-card {
-  background-color: var(--bg-secondary);
+  background-color: #1e293b; /* Slightly lighter dark for cards */
   padding: 40px;
   border-radius: 16px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #334155; /* Dark border */
   text-align: left;
   transition: all 0.3s ease;
+  color: white;
 }
 
 .feature-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   border-color: var(--brand-color);
 }
 
@@ -192,19 +198,21 @@
 .feature-card h3 {
   font-size: 1.5rem;
   margin-bottom: 12px;
+  color: white;
 }
 
 .feature-card p {
-  color: var(--text-secondary);
+  color: #cbd5e1;
   line-height: 1.6;
 }
 
 /* --- 4. Bottom Banner & Footer --- */
 .cta-banner {
   padding: 80px 20px;
-  background-color: var(--bg-secondary);
+  background-color: #1e293b; /* Slightly lighter dark */
   text-align: center;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid #334155;
+  color: white;
 }
 .cta-banner h2 {
   font-size: 2rem;
@@ -218,9 +226,9 @@
 .landing-footer {
   padding: 30px;
   text-align: center;
-  background-color: var(--bg-primary);
-  color: var(--text-secondary);
-  border-top: 1px solid var(--border-color);
+  background-color: #0f172a; /* Dark background */
+  color: #64748b; /* Darker grey text for footer */
+  border-top: 1px solid #1e293b;
 }
 
 /* Responsive adjustments */
