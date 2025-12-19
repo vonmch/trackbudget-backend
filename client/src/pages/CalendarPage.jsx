@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { authFetch } from '../utils/api';
 import './CalendarPage.css';
-import Modal from '../components/common/Modal'; // Reuse your existing modal
+import Modal from '../components/common/Modal'; 
 
 function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -14,7 +14,7 @@ function CalendarPage() {
   // Fetch events from backend
   const fetchEvents = async () => {
     try {
-      const res = await authFetch('/calendar');
+      const res = await authFetch('/api/calendar'); // Ensure this matches your server route
       const data = await res.json();
       setEvents(data);
     } catch (err) { console.error(err); }
@@ -49,7 +49,7 @@ function CalendarPage() {
   // --- Event Actions ---
   const handleAddNote = async () => {
     if (!noteInput.trim()) return;
-    await authFetch('/calendar', {
+    await authFetch('/api/calendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ date: selectedDate, note: noteInput })
@@ -59,7 +59,7 @@ function CalendarPage() {
   };
 
   const handleDeleteNote = async (id) => {
-    await authFetch(`/calendar/${id}`, { method: 'DELETE' });
+    await authFetch(`/api/calendar/${id}`, { method: 'DELETE' });
     fetchEvents();
   };
 
@@ -93,14 +93,18 @@ function CalendarPage() {
             
             return (
                 <div key={day} className="calendar-day" onClick={() => handleDayClick(day)}>
-                    <span className="day-number">{day}</span>
-                    {dayEvents.length > 0 && (
-                        <div className="day-dots">
-                            {dayEvents.map((_, idx) => (
-                                <span key={idx} className="event-dot"></span>
-                            ))}
-                        </div>
-                    )}
+                    <div className="day-number">{day}</div>
+                    
+                    {/* --- UPDATED EVENT LIST SECTION --- */}
+                    <div className="events-list">
+                        {dayEvents.map((event, idx) => (
+                            <div key={idx} className="event-item-row">
+                                <span className="event-dot"></span>
+                                <span className="event-text">{event.note}</span>
+                            </div>
+                        ))}
+                    </div>
+                    {/* ---------------------------------- */}
                 </div>
             );
         })}

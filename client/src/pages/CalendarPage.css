@@ -48,13 +48,15 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     min-height: 100px; /* Makes boxes tall enough */
-    padding: 10px;
+    padding: 8px;      /* Slightly reduced padding to give events more room */
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    /* CHANGED: Align content to start so events sit under the number */
+    justify-content: flex-start; 
+    overflow: hidden; /* Prevents long text from spilling out */
 }
 
 .calendar-day:hover {
@@ -65,6 +67,7 @@
 .day-number {
     font-weight: bold;
     color: var(--text-primary);
+    margin-bottom: 4px; /* Space between number and events */
 }
 
 .empty {
@@ -73,17 +76,39 @@
     cursor: default;
 }
 
-/* Dots for events */
-.day-dots {
+/* --- NEW EVENT LIST STYLES (Dot + Text) --- */
+
+.events-list {
     display: flex;
+    flex-direction: column;
     gap: 4px;
-    flex-wrap: wrap;
+    width: 100%;
 }
+
+.event-item-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    /* Ensure flex container doesn't force items to wrap */
+    flex-wrap: nowrap; 
+}
+
 .event-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background-color: #1677ff; /* Brand Blue */
     border-radius: 50%;
+    margin-right: 6px;
+    flex-shrink: 0; /* Ensures dot stays circular and doesn't squish */
+}
+
+.event-text {
+    font-size: 0.75rem; /* Small text for compact view */
+    color: var(--text-secondary); /* Use secondary text for contrast */
+    white-space: nowrap;      /* Force text to one line */
+    overflow: hidden;         /* Hide overflow */
+    text-overflow: ellipsis;  /* Add "..." if too long */
+    flex: 1;                  /* Take up remaining width */
 }
 
 /* --- MODAL STYLES --- */
