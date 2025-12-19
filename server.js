@@ -305,10 +305,10 @@ app.get('/api/retirement/summary', authenticateToken, async (req, res) => {
   res.json(result.rows);
 });
 
-// --- CALENDAR ROUTES (Moved here from bottom) ---
+// --- CALENDAR ROUTES (Correctly Placed) ---
 
 // 1. Get all events
-app.get('/calendar', authenticateToken, async (req, res) => {
+app.get('/api/calendar', authenticateToken, async (req, res) => {
   try {
     const result = await query(
       "SELECT id, note, TO_CHAR(event_date, 'YYYY-MM-DD') as date FROM calendar_events WHERE user_id = $1 ORDER BY event_date ASC", 
@@ -322,7 +322,7 @@ app.get('/calendar', authenticateToken, async (req, res) => {
 });
 
 // 2. Add a new event
-app.post('/calendar', authenticateToken, async (req, res) => {
+app.post('/api/calendar', authenticateToken, async (req, res) => {
   try {
     const { date, note } = req.body;
     const newEvent = await query(
@@ -337,7 +337,7 @@ app.post('/calendar', authenticateToken, async (req, res) => {
 });
 
 // 3. Delete an event
-app.delete('/calendar/:id', authenticateToken, async (req, res) => {
+app.delete('/api/calendar/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     await query("DELETE FROM calendar_events WHERE id = $1 AND user_id = $2", [id, req.user.id]);
@@ -489,6 +489,7 @@ app.get(/.*/, (req, res) => {
       `CREATE TABLE IF NOT EXISTS assets (id SERIAL PRIMARY KEY, user_id INTEGER, name TEXT, worth DECIMAL, type TEXT)`,
       `CREATE TABLE IF NOT EXISTS retirement (id SERIAL PRIMARY KEY, user_id INTEGER UNIQUE, current_age INTEGER, retire_age INTEGER, current_savings DECIMAL, retirement_goal DECIMAL)`,
       `CREATE TABLE IF NOT EXISTS retirement_contributions (id SERIAL PRIMARY KEY, user_id INTEGER, amount DECIMAL, date TEXT, type TEXT)`,
+      // THIS LINE CREATES THE CALENDAR TABLE AUTOMATICALLY
       `CREATE TABLE IF NOT EXISTS calendar_events (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, event_date DATE NOT NULL, note TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`
     ];
 
