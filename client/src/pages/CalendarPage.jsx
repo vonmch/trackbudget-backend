@@ -14,7 +14,8 @@ function CalendarPage() {
   // Fetch events from backend
   const fetchEvents = async () => {
     try {
-      const res = await authFetch('/api/calendar'); // Ensure this matches your server route
+      // FIX: Changed back to '/calendar' so authFetch handles the '/api' prefix
+      const res = await authFetch('/calendar'); 
       const data = await res.json();
       setEvents(data);
     } catch (err) { console.error(err); }
@@ -49,7 +50,8 @@ function CalendarPage() {
   // --- Event Actions ---
   const handleAddNote = async () => {
     if (!noteInput.trim()) return;
-    await authFetch('/api/calendar', {
+    // FIX: Changed back to '/calendar'
+    await authFetch('/calendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ date: selectedDate, note: noteInput })
@@ -59,7 +61,8 @@ function CalendarPage() {
   };
 
   const handleDeleteNote = async (id) => {
-    await authFetch(`/api/calendar/${id}`, { method: 'DELETE' });
+    // FIX: Changed back to '/calendar'
+    await authFetch(`/calendar/${id}`, { method: 'DELETE' });
     fetchEvents();
   };
 
