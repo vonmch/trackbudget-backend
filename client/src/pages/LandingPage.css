@@ -32,15 +32,18 @@
 .landing-logo-img {
   height: 40px;
   width: auto;
+  border-radius: 8px;
 }
 
 .landing-logo-container h1 {
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(90deg, #ffffff, var(--brand-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  
+  /* --- FIX: SOLID WHITE TEXT --- */
+  /* We removed the gradient/transparent code because it was causing invisibility */
+  color: #ffffff !important; 
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Adds a subtle pop */
 }
 
 .landing-nav {
