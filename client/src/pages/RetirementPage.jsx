@@ -1,4 +1,4 @@
-// src/pages/RetirementPage.jsx (Fixed Modal Props)
+// src/pages/RetirementPage.jsx
 
 import React, { useState, useEffect } from 'react';
 import './RetirementPage.css';
@@ -9,8 +9,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Modal from '../components/common/Modal';
 import RetirementForm from '../components/forms/RetirementForm';
 import ContributionForm from '../components/forms/ContributionForm';
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 function RetirementPage({ isPremium }) {
   const [plan, setPlan] = useState({ 
@@ -41,11 +39,21 @@ function RetirementPage({ isPremium }) {
 
   useEffect(() => { fetchData(); }, []);
 
+  // --- CALCULATIONS (FIXED) ---
   const yearsLeft = plan.retire_age - plan.current_age;
   const totalSaved = plan.total_saved || 0;
   const goal = parseFloat(plan.retirement_goal);
+  
+  // 1. Cap progress at 100% for the text overlay
   const progress = Math.min((totalSaved / goal) * 100, 100);
-  const monthlyNeeded = yearsLeft > 0 ? (goal - totalSaved) / (yearsLeft * 12) : 0;
+
+  // 2. Fix Negative "Remaining" Bug
+  // If saved > goal, remaining is 0 (not negative)
+  const remaining = Math.max(0, goal - totalSaved);
+
+  // 3. Fix Negative "Monthly Needed" Bug
+  // If goal is met, you need to save $0/month
+  const monthlyNeeded = yearsLeft > 0 ? Math.max(0, (goal - totalSaved) / (yearsLeft * 12)) : 0;
 
   const handleDelete = async (id) => {
     if(window.confirm("Delete this contribution?")) {
@@ -71,18 +79,22 @@ function RetirementPage({ isPremium }) {
           
           <div className="stats-body">
             <p>Monthly Deposit To Meet Goal:</p>
-            <h2 style={{color: '#4CAF50', margin: '10px 0'}}>{formatCurrency(monthlyNeeded)}</h2>
+            {/* Show nice green text if goal is met */}
+            <h2 style={{color: '#4CAF50', margin: '10px 0'}}>
+              {monthlyNeeded === 0 && totalSaved >= goal ? "Goal Met! 🎉" : formatCurrency(monthlyNeeded)}
+            </h2>
             
             <div style={{width: '100%', height: '200px'}}>
                 <ResponsiveContainer>
                     <PieChart>
+                        {/* Use the fixed 'remaining' variable here */}
                         <Pie 
-                            data={[{name: 'Saved', value: totalSaved}, {name: 'Remaining', value: goal - totalSaved}]} 
+                            data={[{name: 'Saved', value: totalSaved}, {name: 'Remaining', value: remaining}]} 
                             innerRadius={60} outerRadius={80} 
                             dataKey="value"
                         >
-                            <Cell fill="#0088FE" />
-                            <Cell fill="#333" />
+                            <Cell fill="#0088FE" /> {/* Saved Color */}
+                            <Cell fill="#333" />    {/* Remaining Color */}
                         </Pie>
                         <Tooltip formatter={(value) => formatCurrency(value)} />
                     </PieChart>
@@ -142,7 +154,7 @@ function RetirementPage({ isPremium }) {
         </div>
       </div>
 
-      {/* --- FIXED MODALS (Correct Prop Names) --- */}
+      {/* --- MODALS --- */}
       {isPlanModalOpen && (
         <Modal onClose={() => setPlanModalOpen(false)}>
             <RetirementForm 
