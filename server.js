@@ -453,7 +453,48 @@ app.get(/.*/, (req, res) => {
     for (const sql of tables) {
       await query(sql);
     }
+// --- CALENDAR ROUTES ---
 
+// 1. Get all events
+app.get('/calendar', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, note, TO_CHAR(event_date, 'YYYY-MM-DD') as date FROM calendar_events WHERE user_id = $1 ORDER BY event_date ASC", 
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// 2. Add a new event
+app.post('/calendar', authenticateToken, async (req, res) => {
+  try {
+    const { date, note } = req.body;
+    const newEvent = await pool.query(
+      "INSERT INTO calendar_events (user_id, event_date, note) VALUES ($1, $2, $3) RETURNING id, note, TO_CHAR(event_date, 'YYYY-MM-DD') as date",
+      [req.user.id, date, note]
+    );
+    res.json(newEvent.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// 3. Delete an event
+app.delete('/calendar/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query("DELETE FROM calendar_events WHERE id = $1 AND user_id = $2", [id, req.user.id]);
+    res.json("Deleted");
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
     // 2. DB MIGRATION: Add new columns to 'users' if missing
     try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()'); } catch(e) {}
     try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP DEFAULT NOW()'); } catch(e) {}

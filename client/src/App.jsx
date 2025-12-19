@@ -25,6 +25,7 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import SuccessPage from './pages/SuccessPage';
 import AdminPanelPage from './pages/AdminPanelPage';
+import CalendarPage from './pages/CalendarPage';
 
 const ProtectedLayout = () => {
   const { user, loading } = useAuth();
@@ -68,6 +69,7 @@ const ProtectedLayout = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/success" element={<SuccessPage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
             
             {/* Admin Route */}
             <Route path="/admin" element={<AdminPanelPage />} />

@@ -63,6 +63,11 @@ function Sidebar() {
         >
           🏝️ Retirement Planner
         </NavLink>
+        
+        {/* --- NEW CALENDAR FEATURE --- */}
+        <NavLink to="/calendar" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+          <span>📅</span> Calendar
+        </NavLink>
 
         {/* --- ADMIN PANEL LINK (Only visible to you and client) --- */}
         {user && ADMIN_EMAILS.includes(user.email) && (
