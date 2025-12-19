@@ -446,7 +446,8 @@ app.get(/.*/, (req, res) => {
       `CREATE TABLE IF NOT EXISTS bills (id SERIAL PRIMARY KEY, user_id INTEGER, name TEXT, amount DECIMAL, due_date TEXT, type TEXT, reminder BOOLEAN DEFAULT false, is_paid BOOLEAN DEFAULT false)`,
       `CREATE TABLE IF NOT EXISTS assets (id SERIAL PRIMARY KEY, user_id INTEGER, name TEXT, worth DECIMAL, type TEXT)`,
       `CREATE TABLE IF NOT EXISTS retirement (id SERIAL PRIMARY KEY, user_id INTEGER UNIQUE, current_age INTEGER, retire_age INTEGER, current_savings DECIMAL, retirement_goal DECIMAL)`,
-      `CREATE TABLE IF NOT EXISTS retirement_contributions (id SERIAL PRIMARY KEY, user_id INTEGER, amount DECIMAL, date TEXT, type TEXT)`
+      `CREATE TABLE IF NOT EXISTS retirement_contributions (id SERIAL PRIMARY KEY, user_id INTEGER, amount DECIMAL, date TEXT, type TEXT)`,
+      `CREATE TABLE IF NOT EXISTS calendar_events (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, event_date DATE NOT NULL, note TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`
     ];
 
     for (const sql of tables) {
