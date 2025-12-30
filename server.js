@@ -4,7 +4,7 @@ const cors = require('cors');
 const { Pool } = require('pg'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const path = require('path'); // REQUIRED for deployment
+const path = require('path'); 
 
 // STRIPE SETUP
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); 
@@ -49,12 +49,15 @@ const authenticateToken = (req, res, next) => {
 app.post('/api/auth/signup', async (req, res) => {
   try {
     const { email, password, fullName } = req.body;
+    
+    // 1. Check if user exists
     const existing = await query('SELECT * FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) return res.status(400).json({ error: "User exists" });
 
     const hashed = await bcrypt.hash(password, 10);
     
-    // Attempt to insert with all columns
+    // 2. Try inserting. If the new columns (created_at, last_login) don't exist yet, 
+    //    this might fail. We will return the REAL error if it does.
     const result = await query(
       `INSERT INTO users (email, password, full_name, is_premium, created_at, last_login) 
        VALUES ($1, $2, $3, false, NOW(), NOW()) RETURNING id`, 
@@ -64,46 +67,48 @@ app.post('/api/auth/signup', async (req, res) => {
     const token = jwt.sign({ id: userId, email }, JWT_SECRET);
     res.json({ token, user: { id: userId, email, fullName, is_premium: false } });
   } catch (e) { 
-    console.error("Signup Error:", e); // LOG THE ERROR
-    res.status(500).json({ error: "Error creating user" }); 
+    console.error("Signup Error:", e);
+    // DEBUG: Send exact error to frontend
+    res.status(500).json({ error: e.message, details: "Signup Query Failed" }); 
   }
 });
 
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // 1. Fetch user
     const result = await query('SELECT * FROM users WHERE email = $1', [email]);
     const user = result.rows[0];
     
-    // Check user and password
+    // 2. Check credentials
+    // Note: If 'user' is found but 'user.password' is missing/null in DB, bcrypt will throw here.
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(403).json({ error: "Invalid credentials" });
     }
     
-    // --- SAFE LAST_LOGIN UPDATE ---
-    // We wrap this in a try/catch so if the column is missing, login STILL SUCCEEDS
+    // 3. Safe Update of last_login
     try {
         await query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
     } catch (updateError) {
-        console.warn("Could not update last_login (likely missing column), but proceeding with login.");
+        console.warn("Non-fatal error updating last_login:", updateError.message);
     }
-    // ------------------------------
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
     res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name, is_premium: user.is_premium } });
+
   } catch (e) { 
-    console.error("Login Error:", e); // LOG THE ERROR TO CONSOLE
-    res.status(500).json({ error: "Login error" }); 
+    console.error("Login Error:", e);
+    // DEBUG: This will show the EXACT technical error in your browser console
+    res.status(500).json({ error: e.message, stack: e.stack }); 
   }
 });
 
-// --- ADMIN ROUTE (Fetch All Users) ---
+// --- ADMIN ROUTE ---
 app.get('/api/admin/users', authenticateToken, async (req, res) => {
-    // Only allow specific admins
     if (!ADMIN_EMAILS.includes(req.user.email)) {
-        return res.sendStatus(403); // Forbidden
+        return res.sendStatus(403); 
     }
-
     try {
         const result = await query(`
             SELECT id, full_name, email, is_premium, created_at, last_login 
@@ -112,28 +117,27 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
         `);
         res.json(result.rows);
     } catch (error) {
-        console.error("Admin fetch error:", error);
-        res.status(500).json({ error: "Failed to fetch users" });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// --- USE THIS FOR MONTHLY RECURRING BILLING ---
+// --- BILLING ROUTES ---
 app.post('/api/create-checkout-session', authenticateToken, async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      customer_email: req.user.email, // Lock the email
+      customer_email: req.user.email,
       line_items: [{
           price_data: {
             currency: 'usd',
             product_data: { name: 'TrackBudgetBuild Premium' },
             unit_amount: 2499,
-            recurring: { interval: 'month' }, // <--- MAKES IT MONTHLY
+            recurring: { interval: 'month' },
           },
           quantity: 1,
       }],
-      mode: 'subscription', // <--- REQUIRED FOR RECURRING
-      success_url: `${process.env.CLIENT_URL}/settings`, // Send back to settings so they see the badge
+      mode: 'subscription',
+      success_url: `${process.env.CLIENT_URL}/settings`,
       cancel_url: `${process.env.CLIENT_URL}/settings`,
     });
     res.json({ url: session.url });
@@ -144,30 +148,22 @@ app.put('/api/profile/upgrade', authenticateToken, async (req, res) => {
   try {
     await query(`UPDATE users SET is_premium = true WHERE id = $1`, [req.user.id]);
     res.status(200).json({ message: 'Upgraded to Premium!' });
-  } catch (error) { res.status(500).json({ error: 'Failed to upgrade' }); }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// --- STRIPE CUSTOMER PORTAL (Manage Subscription) ---
 app.post('/api/create-portal-session', authenticateToken, async (req, res) => {
   try {
-    // 1. Find the customer by email
     const customers = await stripe.customers.list({ email: req.user.email, limit: 1 });
     let customerId = customers.data.length > 0 ? customers.data[0].id : null;
 
-    if (!customerId) {
-        return res.status(400).json({ error: "No billing history found." });
-    }
+    if (!customerId) return res.status(400).json({ error: "No billing history found." });
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${process.env.CLIENT_URL}/settings`,
     });
-
     res.json({ url: session.url });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 // --- DATA ROUTES ---
@@ -321,8 +317,6 @@ app.get('/api/retirement/summary', authenticateToken, async (req, res) => {
 });
 
 // --- CALENDAR ROUTES ---
-
-// 1. Get all events
 app.get('/api/calendar', authenticateToken, async (req, res) => {
   try {
     const result = await query(
@@ -330,13 +324,9 @@ app.get('/api/calendar', authenticateToken, async (req, res) => {
       [req.user.id]
     );
     res.json(result.rows);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 2. Add a new event
 app.post('/api/calendar', authenticateToken, async (req, res) => {
   try {
     const { date, note } = req.body;
@@ -345,95 +335,52 @@ app.post('/api/calendar', authenticateToken, async (req, res) => {
       [req.user.id, date, note]
     );
     res.json(newEvent.rows[0]);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 3. Delete an event
 app.delete('/api/calendar/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     await query("DELETE FROM calendar_events WHERE id = $1 AND user_id = $2", [id, req.user.id]);
     res.json("Deleted");
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- UPDATED PROFILE ROUTE (Syncs with Stripe on every load) ---
+// --- PROFILE ROUTES ---
 app.get('/api/profile', authenticateToken, async (req, res) => {
   try {
-    // 1. Get user from DB
     const userResult = await query('SELECT * FROM users WHERE id = $1', [req.user.id]);
     const user = userResult.rows[0];
-
-    // --- ADMIN BYPASS ---
-    // Allows YOUR admins to be Premium forever without paying
     let isStripePremium = false;
 
     if (ADMIN_EMAILS.includes(user.email)) {
         isStripePremium = true; 
-    } 
-    else {
-        // Only check Stripe for everyone else
+    } else {
         const customers = await stripe.customers.list({ email: user.email, limit: 1 });
         if (customers.data.length > 0) {
           const customerId = customers.data[0].id;
-          const subscriptions = await stripe.subscriptions.list({ 
-            customer: customerId,
-            status: 'all'
-          });
-          const activeSub = subscriptions.data.find(sub => 
-            sub.status === 'active' || sub.status === 'trialing'
-          );
+          const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: 'all' });
+          const activeSub = subscriptions.data.find(sub => sub.status === 'active' || sub.status === 'trialing');
           if (activeSub) isStripePremium = true;
         }
     }
-    // ------------------------------------
 
-    // 3. Sync DB if different
     if (user.is_premium !== isStripePremium) {
       await query('UPDATE users SET is_premium = $1 WHERE id = $2', [isStripePremium, user.id]);
       user.is_premium = isStripePremium; 
     }
 
-    // 4. Send back data
-    res.json({
-      full_name: user.full_name,
-      email: user.email,
-      is_premium: user.is_premium,
-      job_description: user.job_description
-    });
-
-  } catch (err) {
-    console.error("Profile sync error:", err);
-    res.status(500).json({ error: "Failed to fetch profile" });
-  }
+    res.json({ full_name: user.full_name, email: user.email, is_premium: user.is_premium, job_description: user.job_description });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- SAVE PROFILE ROUTE ---
 app.post('/api/profile', authenticateToken, async (req, res) => {
   try {
     const { full_name, email, job_description } = req.body;
-    
-    // DB Repair: Ensure column exists
-    try {
-        await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS job_description TEXT');
-    } catch (e) {}
-
-    await query(
-      `UPDATE users SET full_name=$1, email=$2, job_description=$3 WHERE id=$4`, 
-      [full_name, email, job_description, req.user.id]
-    );
-    
+    try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS job_description TEXT'); } catch (e) {}
+    await query(`UPDATE users SET full_name=$1, email=$2, job_description=$3 WHERE id=$4`, [full_name, email, job_description, req.user.id]);
     res.json({ message: 'Saved' });
-  } catch (err) {
-    console.error("Save profile error:", err);
-    res.status(500).json({ error: "Failed to save" });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.put('/api/profile/password', authenticateToken, async (req, res) => {
@@ -442,61 +389,38 @@ app.put('/api/profile/password', authenticateToken, async (req, res) => {
   await query(`UPDATE users SET password=$1 WHERE id=$2`, [hashed, req.user.id]);
   res.json({ message: 'Password updated' });
 });
+
 app.delete('/api/account', authenticateToken, async (req, res) => {
   const uid = req.user.id;
   const tables = ['expenses', 'income', 'savings_buckets', 'bills', 'assets', 'retirement', 'retirement_contributions'];
-  for (const table of tables) {
-    await query(`DELETE FROM ${table} WHERE user_id=$1`, [uid]);
-  }
+  for (const table of tables) { await query(`DELETE FROM ${table} WHERE user_id=$1`, [uid]); }
   await query(`DELETE FROM users WHERE id=$1`, [uid]);
   res.json({ message: 'Account deleted' });
 });
+
 app.get('/api/history', authenticateToken, async (req, res) => {
-  const sql = `
-    SELECT 'expense' as transaction_type, name, amount, date FROM expenses WHERE user_id=$1 
-    UNION ALL 
-    SELECT 'income' as transaction_type, name, amount, date FROM income WHERE user_id=$1 
-    ORDER BY date DESC LIMIT 100
-  `;
+  const sql = `SELECT 'expense' as transaction_type, name, amount, date FROM expenses WHERE user_id=$1 UNION ALL SELECT 'income' as transaction_type, name, amount, date FROM income WHERE user_id=$1 ORDER BY date DESC LIMIT 100`;
   const result = await query(sql, [req.user.id]);
   res.json(result.rows);
 });
 
 app.get('/api/notifications', authenticateToken, async (req, res) => {
-  const sql = `
-    SELECT * FROM bills 
-    WHERE user_id = $1 
-    AND is_paid = false 
-    AND due_date::date >= current_date 
-    AND due_date::date <= current_date + interval '7 days' 
-    ORDER BY due_date ASC
-  `;
+  const sql = `SELECT * FROM bills WHERE user_id = $1 AND is_paid = false AND due_date::date >= current_date AND due_date::date <= current_date + interval '7 days' ORDER BY due_date ASC`;
   const result = await query(sql, [req.user.id]);
   res.json(result.rows);
 });
 
 // --- DEPLOYMENT GLUE CODE (SERVE VITE APP) ---
-// This MUST be after all API routes
 app.use(express.static(path.join(__dirname, 'client/dist')));
-
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
 });
-// ---------------------------------------------
 
 // STARTUP
 (async () => {
   try {
-    // CREATE TABLES
     const tables = [
-      `CREATE TABLE IF NOT EXISTS users (
-         id SERIAL PRIMARY KEY, 
-         email TEXT UNIQUE NOT NULL, 
-         password TEXT NOT NULL, 
-         full_name TEXT, 
-         is_premium BOOLEAN DEFAULT false, 
-         job_description TEXT
-       )`,
+      `CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, full_name TEXT, is_premium BOOLEAN DEFAULT false, job_description TEXT)`,
       `CREATE TABLE IF NOT EXISTS expenses (id SERIAL PRIMARY KEY, user_id INTEGER, name TEXT, amount DECIMAL, date TEXT, want_or_need TEXT)`,
       `CREATE TABLE IF NOT EXISTS income (id SERIAL PRIMARY KEY, user_id INTEGER, name TEXT, amount DECIMAL, date TEXT)`,
       `CREATE TABLE IF NOT EXISTS savings_buckets (id SERIAL PRIMARY KEY, user_id INTEGER, name TEXT, target_amount DECIMAL, end_date TEXT, current_amount DECIMAL DEFAULT 0)`,
@@ -506,20 +430,11 @@ app.get(/.*/, (req, res) => {
       `CREATE TABLE IF NOT EXISTS retirement_contributions (id SERIAL PRIMARY KEY, user_id INTEGER, amount DECIMAL, date TEXT, type TEXT)`,
       `CREATE TABLE IF NOT EXISTS calendar_events (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, event_date DATE NOT NULL, note TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`
     ];
-
-    for (const sql of tables) {
-      await query(sql);
-    }
+    for (const sql of tables) { await query(sql); }
     
-    // 2. DB MIGRATION: Add new columns to 'users' if missing
-    // We log these so you know if they fail
-    try { 
-        await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()'); 
-    } catch(e) { console.log("Migration 'created_at' failed:", e.message); }
-
-    try { 
-        await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP DEFAULT NOW()'); 
-    } catch(e) { console.log("Migration 'last_login' failed:", e.message); }
+    // DB MIGRATION: 
+    try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()'); } catch(e) { console.log("Migrate created_at failed:", e.message); }
+    try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP DEFAULT NOW()'); } catch(e) { console.log("Migrate last_login failed:", e.message); }
 
     console.log('Connected to PostgreSQL & Tables Initialized.');
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
