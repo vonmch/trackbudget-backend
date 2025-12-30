@@ -53,7 +53,8 @@ app.post('/api/auth/signup', async (req, res) => {
     if (existing.rows.length > 0) return res.status(400).json({ error: "User exists" });
 
     const hashed = await bcrypt.hash(password, 10);
-    // Modified to include created_at and last_login
+    
+    // Attempt to insert with all columns
     const result = await query(
       `INSERT INTO users (email, password, full_name, is_premium, created_at, last_login) 
        VALUES ($1, $2, $3, false, NOW(), NOW()) RETURNING id`, 
@@ -62,7 +63,10 @@ app.post('/api/auth/signup', async (req, res) => {
     const userId = result.rows[0].id;
     const token = jwt.sign({ id: userId, email }, JWT_SECRET);
     res.json({ token, user: { id: userId, email, fullName, is_premium: false } });
-  } catch (e) { res.status(500).json({ error: "Error creating user" }); }
+  } catch (e) { 
+    console.error("Signup Error:", e); // LOG THE ERROR
+    res.status(500).json({ error: "Error creating user" }); 
+  }
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -70,16 +74,27 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     const result = await query('SELECT * FROM users WHERE email = $1', [email]);
     const user = result.rows[0];
+    
+    // Check user and password
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(403).json({ error: "Invalid credentials" });
     }
     
-    // Update last_login
-    await query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+    // --- SAFE LAST_LOGIN UPDATE ---
+    // We wrap this in a try/catch so if the column is missing, login STILL SUCCEEDS
+    try {
+        await query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+    } catch (updateError) {
+        console.warn("Could not update last_login (likely missing column), but proceeding with login.");
+    }
+    // ------------------------------
 
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
     res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name, is_premium: user.is_premium } });
-  } catch (e) { res.status(500).json({ error: "Login error" }); }
+  } catch (e) { 
+    console.error("Login Error:", e); // LOG THE ERROR TO CONSOLE
+    res.status(500).json({ error: "Login error" }); 
+  }
 });
 
 // --- ADMIN ROUTE (Fetch All Users) ---
@@ -305,7 +320,7 @@ app.get('/api/retirement/summary', authenticateToken, async (req, res) => {
   res.json(result.rows);
 });
 
-// --- CALENDAR ROUTES (Correctly Placed) ---
+// --- CALENDAR ROUTES ---
 
 // 1. Get all events
 app.get('/api/calendar', authenticateToken, async (req, res) => {
@@ -489,7 +504,6 @@ app.get(/.*/, (req, res) => {
       `CREATE TABLE IF NOT EXISTS assets (id SERIAL PRIMARY KEY, user_id INTEGER, name TEXT, worth DECIMAL, type TEXT)`,
       `CREATE TABLE IF NOT EXISTS retirement (id SERIAL PRIMARY KEY, user_id INTEGER UNIQUE, current_age INTEGER, retire_age INTEGER, current_savings DECIMAL, retirement_goal DECIMAL)`,
       `CREATE TABLE IF NOT EXISTS retirement_contributions (id SERIAL PRIMARY KEY, user_id INTEGER, amount DECIMAL, date TEXT, type TEXT)`,
-      // THIS LINE CREATES THE CALENDAR TABLE AUTOMATICALLY
       `CREATE TABLE IF NOT EXISTS calendar_events (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, event_date DATE NOT NULL, note TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`
     ];
 
@@ -498,14 +512,20 @@ app.get(/.*/, (req, res) => {
     }
     
     // 2. DB MIGRATION: Add new columns to 'users' if missing
-    try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()'); } catch(e) {}
-    try { await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP DEFAULT NOW()'); } catch(e) {}
+    // We log these so you know if they fail
+    try { 
+        await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()'); 
+    } catch(e) { console.log("Migration 'created_at' failed:", e.message); }
+
+    try { 
+        await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP DEFAULT NOW()'); 
+    } catch(e) { console.log("Migration 'last_login' failed:", e.message); }
 
     console.log('Connected to PostgreSQL & Tables Initialized.');
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 
   } catch (e) {
-    console.log("Server running (waiting for DB connection)...");
+    console.log("Server startup failed (waiting for DB connection)...", e);
     app.listen(PORT);
   }
 })();
